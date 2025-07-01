@@ -57,7 +57,7 @@
 }
 {% endschema %}
 
-<!-- Nitted Waitlist Minimal Landing Page Section with Scrollable Product Gallery and Logo -->
+<!-- Nitted Waitlist Minimal Landing Page Section with Auto-Scrolling Product Gallery and Logo -->
 <style>
   :root {
     --beige: #FAF5EF;
@@ -245,17 +245,29 @@
   </div>
 </div>
 <script>
-  // Snap scroll by one image at a time
+  // Snap scroll by one image at a time and auto-scroll every 3 seconds
   document.addEventListener('DOMContentLoaded', function() {
     var scrollEl = document.getElementById('gallery-scroll');
     var leftBtn = document.getElementById('gallery-left');
     var rightBtn = document.getElementById('gallery-right');
-    var imgWidth = scrollEl.querySelector('.nitted-gallery-img')?.offsetWidth || 220;
+    var imgs = scrollEl.querySelectorAll('.nitted-gallery-img');
+    var imgWidth = imgs[0]?.offsetWidth || 220;
+    var currentIndex = 0;
+    function scrollToIndex(idx) {
+      scrollEl.scrollTo({ left: idx * (imgWidth + 20), behavior: 'smooth' });
+    }
     leftBtn.addEventListener('click', function() {
-      scrollEl.scrollBy({ left: -imgWidth - 20, behavior: 'smooth' });
+      currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
+      scrollToIndex(currentIndex);
     });
     rightBtn.addEventListener('click', function() {
-      scrollEl.scrollBy({ left: imgWidth + 20, behavior: 'smooth' });
+      currentIndex = (currentIndex + 1) % imgs.length;
+      scrollToIndex(currentIndex);
     });
+    // Auto-scroll every 3 seconds
+    setInterval(function() {
+      currentIndex = (currentIndex + 1) % imgs.length;
+      scrollToIndex(currentIndex);
+    }, 3000);
   });
 </script>
