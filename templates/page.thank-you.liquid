@@ -1,0 +1,61 @@
+<!-- Nitted Thank You Page -->
+<style>
+  :root {
+    --beige: #FAF5EF;
+    --black: #000000;
+    --radius: 2.2rem;
+    --font-heading: 'Poppins', 'Satoshi', Arial, sans-serif;
+    --font-body: 'Inter', 'Open Sans', Arial, sans-serif;
+  }
+  html, body {
+    background: var(--beige);
+    color: var(--black);
+    font-family: var(--font-body);
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .nitted-thankyou-main {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--beige);
+  }
+  .nitted-logo-img {
+    display: block;
+    margin: 0 auto 2.2rem auto;
+    max-width: 120px;
+    max-height: 60px;
+    object-fit: contain;
+  }
+  .nitted-thankyou-title {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin: 0 0 1.1rem 0;
+    letter-spacing: 0.01em;
+    text-align: center;
+  }
+  .nitted-thankyou-sub {
+    font-size: 1.13rem;
+    font-weight: 400;
+    color: #222;
+    text-align: center;
+    margin-bottom: 2.2rem;
+  }
+  @media (max-width: 700px) {
+    .nitted-logo-img { max-width: 80px; max-height: 40px; }
+    .nitted-thankyou-title { font-size: 1.4rem; }
+  }
+</style>
+<div class="nitted-thankyou-main">
+  <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
+  <h1 class="nitted-thankyou-title">Thank you for joining the waitlist!</h1>
+  <div class="nitted-thankyou-sub">You're on the list for first access and exclusive offers.</div>
+</div> 
