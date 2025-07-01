@@ -217,69 +217,15 @@
 <div class="nitted-content">
   <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
   <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
-  <form id="nitted-email-form" class="nitted-email-form" autocomplete="off">
+  <form method="post" action="/account" accept-charset="UTF-8" class="nitted-email-form" autocomplete="off">
     <input type="hidden" name="form_type" value="customer" />
     <input type="hidden" name="utf8" value="✓" />
+    <input type="hidden" name="return_to" value="/pages/thank-you" />
     <input type="email" name="contact[email]" class="nitted-email-input" placeholder="Enter your email" required>
     <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
-    <div id="nitted-email-error" style="color:#b00; font-size:1rem; margin-top:0.5rem; display:none;"></div>
   </form>
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
   <div class="nitted-gallery-container">
     <img id="nitted-gallery-img" src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo" class="nitted-gallery-img" loading="lazy">
   </div>
 </div>
-<script>
-  // Auto-advance single image gallery every 3 seconds with motion blur
-  document.addEventListener('DOMContentLoaded', function() {
-    var images = [
-      "{{ 'product-photo1.png' | asset_url }}",
-      "{{ 'product-photo2.png' | asset_url }}"
-    ];
-    var imgEl = document.getElementById('nitted-gallery-img');
-    var currentIndex = 0;
-    setInterval(function() {
-      // Add motion blur class
-      imgEl.classList.add('motion-blur');
-      setTimeout(function() {
-        currentIndex = (currentIndex + 1) % images.length;
-        imgEl.src = images[currentIndex];
-        imgEl.classList.remove('motion-blur');
-      }, 350); // blur for 350ms
-    }, 3000);
-  });
-
-  // Email signup AJAX
-  document.addEventListener('DOMContentLoaded', function() {
-    var form = document.getElementById('nitted-email-form');
-    var errorDiv = document.getElementById('nitted-email-error');
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      errorDiv.style.display = 'none';
-      var email = form.querySelector('input[name="contact[email]"]').value;
-      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        errorDiv.textContent = 'Please enter a valid email address.';
-        errorDiv.style.display = 'block';
-        return;
-      }
-      var data = new FormData(form);
-      fetch('/account', {
-        method: 'POST',
-        body: data,
-        headers: { 'Accept': 'text/html,application/xhtml+xml' }
-      })
-      .then(function(response) {
-        if (response.ok) {
-          window.location.href = '/pages/thank-you';
-        } else {
-          errorDiv.textContent = 'There was a problem signing up. Please try again.';
-          errorDiv.style.display = 'block';
-        }
-      })
-      .catch(function() {
-        errorDiv.textContent = 'There was a problem signing up. Please try again.';
-        errorDiv.style.display = 'block';
-      });
-    });
-  });
-</script>
