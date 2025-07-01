@@ -57,7 +57,7 @@
 }
 {% endschema %}
 
-<!-- Nitted Waitlist Minimal Landing Page Section with Scrollable Product Gallery -->
+<!-- Nitted Waitlist Minimal Landing Page Section with Scrollable Product Gallery and Logo -->
 <style>
   :root {
     --beige: #FAF5EF;
@@ -73,31 +73,25 @@
     font-weight: 400;
     margin: 0;
     padding: 0;
-    min-height: 100vh;
     height: 100vh;
-    overflow-x: hidden;
+    min-height: 100vh;
+    overflow: hidden;
   }
   body, .nitted-main {
-    min-height: 100vh;
+    height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
   }
-  .nitted-logo {
-    font-family: var(--font-heading);
-    font-weight: 600;
-    font-size: 2.1rem;
-    letter-spacing: 0.04em;
-    color: var(--black);
-    background: rgba(250,245,239,0.85);
-    border-radius: 1.2rem;
-    padding: 0.3em 1.2em;
-    margin-bottom: 2.2rem;
-    margin-top: 0;
-    align-self: center;
-    user-select: none;
+  .nitted-logo-img {
+    display: block;
+    margin: 0 auto 2.2rem auto;
+    max-width: 120px;
+    max-height: 60px;
+    object-fit: contain;
   }
   .nitted-hero-title {
     font-family: var(--font-heading);
@@ -119,81 +113,119 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 420px;
+    max-width: 480px;
     margin: 0 auto 1.1rem auto;
     gap: 0.7rem;
   }
   .nitted-email-input {
     width: 100%;
-    padding: 1.1rem 1.2rem;
+    padding: 1.5rem 1.5rem;
     border-radius: var(--radius);
     border: 1.5px solid #ece6dd;
-    font-size: 1.08rem;
+    font-size: 1.25rem;
     font-family: var(--font-body);
     background: #fff;
     outline: none;
     transition: border 0.2s;
+    text-align: center;
   }
   .nitted-email-input:focus {
     border: 1.5px solid var(--black);
   }
   .nitted-email-btn {
     width: 100%;
-    padding: 1.1rem 0;
+    padding: 1.5rem 0;
     border-radius: var(--radius);
     border: none;
     background: var(--black);
     color: var(--beige);
     font-family: var(--font-heading);
-    font-size: 1.08rem;
+    font-size: 1.25rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
+    margin-top: 0.5rem;
   }
   .nitted-email-btn:hover, .nitted-email-btn:focus {
     background: #222;
   }
   .nitted-hero-cta-sub {
-    font-size: 0.98rem;
+    font-size: 1.05rem;
     color: #444;
-    margin-top: 0.5rem;
+    margin-top: 0.7rem;
     text-align: center;
     margin-bottom: 2.2rem;
+  }
+  .nitted-gallery-container {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1.2rem;
+    margin-bottom: 0;
+    pointer-events: auto;
   }
   .nitted-gallery-scroll {
     display: flex;
     flex-direction: row;
     gap: 1.2rem;
     overflow-x: auto;
-    padding: 0.5rem 0 1.5rem 0;
-    width: 100vw;
-    justify-content: center;
-    scrollbar-width: thin;
-    scrollbar-color: #ece6dd #faf5ef;
+    scroll-snap-type: x mandatory;
+    padding: 0.5rem 0;
+    width: 70vw;
+    max-width: 600px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .nitted-gallery-scroll::-webkit-scrollbar {
+    display: none;
   }
   .nitted-gallery-img {
     flex: 0 0 auto;
-    width: 220px;
-    height: 280px;
+    width: 260px;
+    height: 320px;
     object-fit: cover;
     border-radius: 1.2rem;
     box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
     background: #f0e8de;
     transition: transform 0.2s, box-shadow 0.2s;
+    scroll-snap-align: center;
   }
   .nitted-gallery-img:hover {
     transform: scale(1.04);
     box-shadow: 0 4px 32px 0 rgba(0,0,0,0.13);
   }
+  .nitted-gallery-arrow {
+    background: var(--beige);
+    border: none;
+    color: var(--black);
+    font-size: 2.2rem;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: background 0.2s;
+    z-index: 2;
+  }
+  .nitted-gallery-arrow:active, .nitted-gallery-arrow:focus {
+    background: #f0e8de;
+  }
   @media (max-width: 700px) {
-    .nitted-logo { font-size: 1.3rem; padding: 0.2em 0.8em; }
+    .nitted-logo-img { max-width: 80px; max-height: 40px; }
     .nitted-hero-title { font-size: 1.4rem; }
     .nitted-email-form { max-width: 98vw; }
+    .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
     .nitted-gallery-img { width: 140px; height: 160px; }
+    .nitted-gallery-scroll { width: 90vw; }
   }
 </style>
 <div class="nitted-main">
-  <div class="nitted-logo">nitted</div>
+  <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
   <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
   <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
   <form method="post" action="/account" accept-charset="UTF-8" class="nitted-email-form" autocomplete="off">
@@ -203,8 +235,27 @@
     <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
   </form>
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
-  <div class="nitted-gallery-scroll">
-    <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-gallery-img" loading="lazy">
-    <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-gallery-img" loading="lazy">
+  <div class="nitted-gallery-container">
+    <button class="nitted-gallery-arrow" id="gallery-left" aria-label="Scroll left" type="button">&#8592;</button>
+    <div class="nitted-gallery-scroll" id="gallery-scroll">
+      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-gallery-img" loading="lazy">
+      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-gallery-img" loading="lazy">
+    </div>
+    <button class="nitted-gallery-arrow" id="gallery-right" aria-label="Scroll right" type="button">&#8594;</button>
   </div>
 </div>
+<script>
+  // Snap scroll by one image at a time
+  document.addEventListener('DOMContentLoaded', function() {
+    var scrollEl = document.getElementById('gallery-scroll');
+    var leftBtn = document.getElementById('gallery-left');
+    var rightBtn = document.getElementById('gallery-right');
+    var imgWidth = scrollEl.querySelector('.nitted-gallery-img')?.offsetWidth || 220;
+    leftBtn.addEventListener('click', function() {
+      scrollEl.scrollBy({ left: -imgWidth - 20, behavior: 'smooth' });
+    });
+    rightBtn.addEventListener('click', function() {
+      scrollEl.scrollBy({ left: imgWidth + 20, behavior: 'smooth' });
+    });
+  });
+</script>
