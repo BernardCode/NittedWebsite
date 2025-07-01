@@ -57,7 +57,7 @@
 }
 {% endschema %}
 
-<!-- Nitted Waitlist Minimal Landing Page Section with Auto-Scrolling Product Gallery and Logo -->
+<!-- Nitted Waitlist Minimal Landing Page Section with Auto-Advancing Single Image Gallery and Logo -->
 <style>
   :root {
     --beige: #FAF5EF;
@@ -165,23 +165,7 @@
     margin-bottom: 0;
     pointer-events: auto;
   }
-  .nitted-gallery-scroll {
-    display: flex;
-    flex-direction: row;
-    gap: 1.2rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 0.5rem 0;
-    width: 70vw;
-    max-width: 600px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .nitted-gallery-scroll::-webkit-scrollbar {
-    display: none;
-  }
   .nitted-gallery-img {
-    flex: 0 0 auto;
     width: 260px;
     height: 320px;
     object-fit: cover;
@@ -189,31 +173,12 @@
     box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
     background: #f0e8de;
     transition: transform 0.2s, box-shadow 0.2s;
-    scroll-snap-align: center;
+    display: block;
+    margin: 0 auto;
   }
   .nitted-gallery-img:hover {
     transform: scale(1.04);
     box-shadow: 0 4px 32px 0 rgba(0,0,0,0.13);
-  }
-  .nitted-gallery-arrow {
-    background: var(--beige);
-    border: none;
-    color: var(--black);
-    font-size: 2.2rem;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
-    cursor: pointer;
-    margin: 0 0.5rem;
-    transition: background 0.2s;
-    z-index: 2;
-  }
-  .nitted-gallery-arrow:active, .nitted-gallery-arrow:focus {
-    background: #f0e8de;
   }
   @media (max-width: 700px) {
     .nitted-logo-img { max-width: 80px; max-height: 40px; }
@@ -221,7 +186,6 @@
     .nitted-email-form { max-width: 98vw; }
     .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
     .nitted-gallery-img { width: 140px; height: 160px; }
-    .nitted-gallery-scroll { width: 90vw; }
   }
 </style>
 <div class="nitted-main">
@@ -236,38 +200,21 @@
   </form>
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
   <div class="nitted-gallery-container">
-    <button class="nitted-gallery-arrow" id="gallery-left" aria-label="Scroll left" type="button">&#8592;</button>
-    <div class="nitted-gallery-scroll" id="gallery-scroll">
-      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-gallery-img" loading="lazy">
-      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-gallery-img" loading="lazy">
-    </div>
-    <button class="nitted-gallery-arrow" id="gallery-right" aria-label="Scroll right" type="button">&#8594;</button>
+    <img id="nitted-gallery-img" src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo" class="nitted-gallery-img" loading="lazy">
   </div>
 </div>
 <script>
-  // Snap scroll by one image at a time and auto-scroll every 3 seconds
+  // Auto-advance single image gallery every 3 seconds
   document.addEventListener('DOMContentLoaded', function() {
-    var scrollEl = document.getElementById('gallery-scroll');
-    var leftBtn = document.getElementById('gallery-left');
-    var rightBtn = document.getElementById('gallery-right');
-    var imgs = scrollEl.querySelectorAll('.nitted-gallery-img');
-    var imgWidth = imgs[0]?.offsetWidth || 220;
+    var images = [
+      "{{ 'product-photo1.png' | asset_url }}",
+      "{{ 'product-photo2.png' | asset_url }}"
+    ];
+    var imgEl = document.getElementById('nitted-gallery-img');
     var currentIndex = 0;
-    function scrollToIndex(idx) {
-      scrollEl.scrollTo({ left: idx * (imgWidth + 20), behavior: 'smooth' });
-    }
-    leftBtn.addEventListener('click', function() {
-      currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
-      scrollToIndex(currentIndex);
-    });
-    rightBtn.addEventListener('click', function() {
-      currentIndex = (currentIndex + 1) % imgs.length;
-      scrollToIndex(currentIndex);
-    });
-    // Auto-scroll every 3 seconds
     setInterval(function() {
-      currentIndex = (currentIndex + 1) % imgs.length;
-      scrollToIndex(currentIndex);
+      currentIndex = (currentIndex + 1) % images.length;
+      imgEl.src = images[currentIndex];
     }, 3000);
   });
 </script>
