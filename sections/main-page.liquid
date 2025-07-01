@@ -56,3 +56,387 @@
   ]
 }
 {% endschema %}
+
+<!-- Nitted Waitlist Landing Page Section -->
+<section>
+  <style>
+    :root {
+      --beige: #FAF5EF;
+      --beige-accent: #F0E8DE;
+      --black: #000000;
+      --radius: 2.2rem;
+      --font-heading: 'Poppins', 'Satoshi', Arial, sans-serif;
+      --font-body: 'Inter', 'Open Sans', Arial, sans-serif;
+    }
+    html, body {
+      background: var(--beige);
+      color: var(--black);
+      font-family: var(--font-body);
+      font-weight: 400;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      scroll-behavior: smooth;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .nitted-hero {
+      background: var(--beige) url('{{ 'placeholder-texture.jpg' | asset_url }}') center/cover no-repeat;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2.5rem 1.2rem 2rem 1.2rem;
+      position: relative;
+      text-align: center;
+    }
+    .nitted-logo {
+      position: absolute;
+      top: 2.2rem;
+      left: 2.2rem;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 2.1rem;
+      letter-spacing: 0.04em;
+      color: var(--black);
+      background: rgba(250,245,239,0.85);
+      border-radius: 1.2rem;
+      padding: 0.3em 0.8em;
+      z-index: 2;
+      user-select: none;
+    }
+    .nitted-hero-title {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin: 4.5rem 0 1.1rem 0;
+      letter-spacing: 0.01em;
+    }
+    .nitted-hero-sub {
+      font-size: 1.18rem;
+      font-weight: 400;
+      margin-bottom: 2.2rem;
+      color: #222;
+    }
+    .nitted-email-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 1.1rem auto;
+      gap: 0.7rem;
+    }
+    .nitted-email-input {
+      width: 100%;
+      padding: 1.1rem 1.2rem;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--beige-accent);
+      font-size: 1.08rem;
+      font-family: var(--font-body);
+      background: #fff;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .nitted-email-input:focus {
+      border: 1.5px solid var(--black);
+    }
+    .nitted-email-btn {
+      width: 100%;
+      padding: 1.1rem 0;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--black);
+      color: var(--beige);
+      font-family: var(--font-heading);
+      font-size: 1.08rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nitted-email-btn:hover, .nitted-email-btn:focus {
+      background: #222;
+    }
+    .nitted-hero-cta-sub {
+      font-size: 0.98rem;
+      color: #444;
+      margin-top: 0.5rem;
+    }
+    /* Visual Preview Section */
+    .nitted-preview {
+      width: 100%;
+      background: transparent;
+      padding: 2.5rem 0 2.5rem 0;
+      overflow-x: auto;
+    }
+    .nitted-preview-scroll {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      align-items: stretch;
+      padding: 0 1.2rem;
+      scroll-snap-type: x mandatory;
+      overflow-x: auto;
+    }
+    .nitted-preview-img {
+      min-width: 260px;
+      max-width: 340px;
+      height: 340px;
+      background: var(--beige-accent) center/cover no-repeat;
+      border-radius: 1.5rem;
+      box-shadow: 0 2px 16px 0 rgba(0,0,0,0.06);
+      scroll-snap-align: start;
+      transition: transform 0.25s, box-shadow 0.25s;
+      cursor: pointer;
+    }
+    .nitted-preview-img:hover {
+      transform: scale(1.035);
+      box-shadow: 0 4px 32px 0 rgba(0,0,0,0.10);
+    }
+    /* Brand Story Section */
+    .nitted-story {
+      background: var(--beige-accent);
+      padding: 3.5rem 1.2rem 3.5rem 1.2rem;
+      text-align: center;
+    }
+    .nitted-story-title {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1.1rem;
+    }
+    .nitted-story-text {
+      font-size: 1.13rem;
+      font-weight: 400;
+      color: #222;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    /* Social Links Section */
+    .nitted-social {
+      display: flex;
+      justify-content: center;
+      gap: 2.2rem;
+      padding: 2.5rem 0 1.5rem 0;
+    }
+    .nitted-social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--beige-accent);
+      color: var(--black);
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+    .nitted-social-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    .nitted-social-icon:hover, .nitted-social-icon:focus {
+      background: var(--black);
+      color: var(--beige);
+    }
+    /* Footer */
+    .nitted-footer {
+      background: var(--beige);
+      padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+      text-align: center;
+      font-size: 0.98rem;
+      color: #444;
+    }
+    .nitted-footer-row {
+      margin-bottom: 1.1rem;
+    }
+    .nitted-footer-email-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      max-width: 340px;
+      margin: 0 auto 1.1rem auto;
+    }
+    .nitted-footer-email-input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--beige-accent);
+      font-size: 1rem;
+      background: #fff;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .nitted-footer-email-input:focus {
+      border: 1.5px solid var(--black);
+    }
+    .nitted-footer-email-btn {
+      padding: 0.7rem 1.1rem;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--black);
+      color: var(--beige);
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nitted-footer-email-btn:hover, .nitted-footer-email-btn:focus {
+      background: #222;
+    }
+    .nitted-footer-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .nitted-footer-link {
+      color: #444;
+      text-decoration: none;
+      font-size: 0.98rem;
+      transition: color 0.2s;
+    }
+    .nitted-footer-link:hover, .nitted-footer-link:focus {
+      color: var(--black);
+    }
+    /* Sticky CTA for mobile */
+    .nitted-sticky-cta {
+      display: none;
+    }
+    @media (max-width: 700px) {
+      .nitted-hero-title { font-size: 2rem; }
+      .nitted-logo { font-size: 1.3rem; left: 1.1rem; top: 1.1rem; padding: 0.2em 0.6em; }
+      .nitted-preview-img { min-width: 180px; max-width: 220px; height: 180px; }
+      .nitted-story-title { font-size: 1.3rem; }
+      .nitted-story { padding: 2.2rem 0.7rem; }
+      .nitted-preview { padding: 1.5rem 0; }
+      .nitted-social { gap: 1.1rem; }
+      .nitted-footer { padding: 1.2rem 0.7rem; }
+      .nitted-sticky-cta {
+        display: block;
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        background: var(--beige-accent);
+        box-shadow: 0 -2px 16px 0 rgba(0,0,0,0.06);
+        padding: 0.7rem 1.2rem 0.7rem 1.2rem;
+        z-index: 100;
+      }
+      .nitted-sticky-form {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .nitted-sticky-input {
+        flex: 1;
+        padding: 0.7rem 1rem;
+        border-radius: var(--radius);
+        border: 1.5px solid var(--beige-accent);
+        font-size: 1rem;
+        background: #fff;
+        outline: none;
+      }
+      .nitted-sticky-btn {
+        padding: 0.7rem 1.1rem;
+        border-radius: var(--radius);
+        border: none;
+        background: var(--black);
+        color: var(--beige);
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    }
+    /* Scroll reveal animation */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s, transform 0.7s; }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+  <script>
+    // Simple scroll reveal
+    document.addEventListener('DOMContentLoaded', function() {
+      function revealOnScroll() {
+        document.querySelectorAll('.reveal').forEach(function(el) {
+          var rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight - 60) {
+            el.classList.add('visible');
+          }
+        });
+      }
+      window.addEventListener('scroll', revealOnScroll);
+      revealOnScroll();
+    });
+  </script>
+  <!-- Hero Section -->
+  <header class="nitted-hero reveal">
+    <div class="nitted-logo">nitted</div>
+    <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
+    <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
+    <form method="post" action="/account" accept-charset="UTF-8" class="nitted-email-form" autocomplete="off">
+      <input type="hidden" name="form_type" value="customer" />
+      <input type="hidden" name="utf8" value="✓" />
+      <input type="email" name="contact[email]" class="nitted-email-input" placeholder="Enter your email" required>
+      <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
+    </form>
+    <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
+  </header>
+  <!-- Visual Preview Section -->
+  <section class="nitted-preview reveal">
+    <div class="nitted-preview-scroll">
+      <!-- Replace these with your own images in assets/ -->
+      <div class="nitted-preview-img" style="background-image:url('{{ 'placeholder-hoodie.jpg' | asset_url }}');"></div>
+      <div class="nitted-preview-img" style="background-image:url('{{ 'placeholder-texture.jpg' | asset_url }}');"></div>
+      <div class="nitted-preview-img" style="background-image:url('{{ 'placeholder-lifestyle.jpg' | asset_url }}');"></div>
+    </div>
+  </section>
+  <!-- Brand Story Section -->
+  <section class="nitted-story reveal">
+    <h2 class="nitted-story-title">Soft, Simple, Slow.</h2>
+    <p class="nitted-story-text">We're a cozy-core brand crafting wearable calm. Thoughtful materials, genderless fits, and limited drops — made to slow down with you.</p>
+  </section>
+  <!-- Social Links Section -->
+  <section class="nitted-social reveal">
+    <a href="#" class="nitted-social-icon" aria-label="Instagram"><svg viewBox="0 0 24 24"><use xlink:href="#icon-instagram" /></svg></a>
+    <a href="#" class="nitted-social-icon" aria-label="TikTok"><svg viewBox="0 0 24 24"><use xlink:href="#icon-tiktok" /></svg></a>
+    <a href="#" class="nitted-social-icon" aria-label="Pinterest"><svg viewBox="0 0 24 24"><use xlink:href="#icon-pinterest" /></svg></a>
+  </section>
+  <!-- Footer -->
+  <footer class="nitted-footer">
+    <div class="nitted-footer-row">
+      <small>© nitted 2025. Designed for comfort.</small>
+    </div>
+    <form method="post" action="/account" accept-charset="UTF-8" class="nitted-footer-email-form" autocomplete="off">
+      <input type="hidden" name="form_type" value="customer" />
+      <input type="hidden" name="utf8" value="✓" />
+      <input type="email" name="contact[email]" class="nitted-footer-email-input" placeholder="Sign up to never miss a drop" required>
+      <button type="submit" class="nitted-footer-email-btn">→</button>
+    </form>
+    <nav class="nitted-footer-nav">
+      <a href="#" class="nitted-footer-link">About</a>
+      <a href="#" class="nitted-footer-link">Contact</a>
+      <a href="#" class="nitted-footer-link">Instagram</a>
+      <a href="#" class="nitted-footer-link">FAQ</a>
+    </nav>
+  </footer>
+  <!-- SVG Sprite for Social Icons (replace with your own SVGs if desired) -->
+  <svg style="display:none;">
+    <symbol id="icon-instagram" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><rect x="7.5" y="7.5" width="9" height="9" rx="4.5" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="17" cy="7" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="icon-tiktok" viewBox="0 0 24 24"><path d="M9 8v8a3 3 0 1 0 3-3h-1" stroke="currentColor" stroke-width="2" fill="none"/><path d="M15 3v2a4 4 0 0 0 4 4h1" stroke="currentColor" stroke-width="2" fill="none"/></symbol>
+    <symbol id="icon-pinterest" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 17c-2.5 0-4-1.5-4-4 0-2.5 1.5-4 4-4s4 1.5 4 4c0 2.5-1.5 4-4 4z" stroke="currentColor" stroke-width="2" fill="none"/></symbol>
+  </svg>
+  <!-- Sticky CTA for mobile -->
+  <div class="nitted-sticky-cta">
+    <form method="post" action="/account" accept-charset="UTF-8" class="nitted-sticky-form" autocomplete="off">
+      <input type="hidden" name="form_type" value="customer" />
+      <input type="hidden" name="utf8" value="✓" />
+      <input type="email" name="contact[email]" class="nitted-sticky-input" placeholder="Enter your email" required>
+      <button type="submit" class="nitted-sticky-btn">Join Waitlist</button>
+    </form>
+  </div>
+</section>
