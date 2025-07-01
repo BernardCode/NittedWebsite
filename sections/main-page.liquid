@@ -217,29 +217,8 @@
 <div class="nitted-content">
   <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
   <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
-  <form method="post" action="/contact#newsletter-form" id="newsletter-form" class="nitted-email-form" accept-charset="UTF-8" autocomplete="off">
-    <input type="email" name="contact[email]" class="nitted-email-input" placeholder="Enter your email" required>
-    <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
-  </form>
-  <div id="newsletter-thankyou" style="display:none; color:#1a4d1a; font-size:1.1rem; margin-top:1.2rem; text-align:center;">Thank you for joining the waitlist! You're on the list for first access and exclusive offers.</div>
-  <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
+  {% section 'newsletter' %}
   <div class="nitted-gallery-container">
     <img id="nitted-gallery-img" src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo" class="nitted-gallery-img" loading="lazy">
   </div>
 </div>
-
-<script>
-  // Newsletter thank you message
-  document.addEventListener('DOMContentLoaded', function() {
-    var form = document.getElementById('newsletter-form');
-    var thankyou = document.getElementById('newsletter-thankyou');
-    if (form) {
-      form.addEventListener('submit', function(e) {
-        setTimeout(function() {
-          form.style.display = 'none';
-          thankyou.style.display = 'block';
-        }, 500); // Give Shopify a moment to process
-      });
-    }
-  });
-</script>
