@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Truly infinite, virtualized, drag-to-scroll horizontal gallery (no scrollbars, no limits)
+// Optimized, truly infinite, virtualized, drag-to-scroll horizontal gallery
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -276,22 +276,21 @@
   var inner = document.getElementById('nitted-infinite-gallery-inner');
   var imgHeight = window.innerWidth < 700 ? 100 : 220;
   var imgMargin = window.innerWidth < 700 ? 8 : 18;
-  var buffer = 2; // images outside viewport
-  var imgCount = 0;
-  var imgWidth = 0;
+  var buffer = 1; // minimal buffer for performance
+  var imgWidth = imgHeight; // fallback, will update after first render
   var state = {
     offset: 0, // virtual scroll offset in px
     dragging: false,
     dragStartX: 0,
     dragStartOffset: 0,
-    leftMostIdx: 0 // index of leftmost image
+    leftMostIdx: 0, // index of leftmost image
+    rafId: null
   };
 
   function mod(n, m) {
     return ((n % m) + m) % m;
   }
 
-  // Helper to create an image element
   function createImg(idx) {
     var img = document.createElement('img');
     var safeIdx = mod(idx, imageSources.length);
@@ -303,56 +302,62 @@
     return img;
   }
 
-  // Fill enough images to cover viewport + buffer
   function fillImages() {
     inner.innerHTML = '';
     var vw = outer.offsetWidth;
     var n = Math.ceil(vw / (imgHeight + 2 * imgMargin)) + 2 * buffer;
-    imgCount = n;
     for (var i = 0; i < n; i++) {
       var img = createImg(state.leftMostIdx + i);
       inner.appendChild(img);
     }
-    // After first render, measure width
     var firstImg = inner.querySelector('.nitted-infinite-img');
     if (firstImg) {
       imgWidth = firstImg.offsetWidth || imgHeight;
     } else {
       imgWidth = imgHeight;
     }
+    state.offset = 0;
     updatePositions();
   }
 
-  // Position images based on current offset
   function updatePositions() {
     inner.style.transform = 'translateX(' + state.offset + 'px)';
   }
 
-  // Recycle images as needed
-  function recycleImages() {
+  // Efficient recycling: only when offset passes a full image width
+  function recycleIfNeeded() {
     var imgs = Array.from(inner.children);
-    var vw = outer.offsetWidth;
-    // Remove leftmost if it's far left
-    while (imgs.length && imgs[0].getBoundingClientRect().right < outer.getBoundingClientRect().left - imgWidth) {
-      inner.removeChild(imgs[0]);
+    var totalImgWidth = imgWidth + 2 * imgMargin;
+    // Recycle right
+    while (state.offset <= -totalImgWidth) {
+      // Remove leftmost, add rightmost
+      inner.removeChild(inner.firstChild);
+      var newIdx = parseInt(imgs[imgs.length - 1].dataset.idx, 10) + 1;
+      inner.appendChild(createImg(newIdx));
       state.leftMostIdx++;
-      // Add new rightmost
-      var newImg = createImg(state.leftMostIdx + imgs.length - 1);
-      inner.appendChild(newImg);
+      state.offset += totalImgWidth;
       imgs = Array.from(inner.children);
     }
-    // Remove rightmost if it's far right
-    while (imgs.length && imgs[imgs.length-1].getBoundingClientRect().left > outer.getBoundingClientRect().right + imgWidth) {
-      inner.removeChild(imgs[imgs.length-1]);
-      // Add new leftmost
+    // Recycle left
+    while (state.offset >= totalImgWidth) {
+      // Remove rightmost, add leftmost
+      inner.removeChild(inner.lastChild);
+      var newIdx = parseInt(imgs[0].dataset.idx, 10) - 1;
+      inner.insertBefore(createImg(newIdx), inner.firstChild);
       state.leftMostIdx--;
-      var newImg = createImg(state.leftMostIdx);
-      inner.insertBefore(newImg, inner.firstChild);
-      // Adjust offset so content doesn't jump
-      state.offset -= (imgWidth + 2 * imgMargin);
-      updatePositions();
+      state.offset -= totalImgWidth;
       imgs = Array.from(inner.children);
     }
+  }
+
+  // Animation frame update
+  function rafUpdate() {
+    updatePositions();
+    recycleIfNeeded();
+    state.rafId = null;
+  }
+  function requestUpdate() {
+    if (!state.rafId) state.rafId = requestAnimationFrame(rafUpdate);
   }
 
   // Drag logic
@@ -367,8 +372,7 @@
     var x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
     var dx = x - state.dragStartX;
     state.offset = state.dragStartOffset + dx;
-    updatePositions();
-    recycleImages();
+    requestUpdate();
   }
   function onPointerUp(e) {
     state.dragging = false;
@@ -423,3 +427,4 @@
   setInterval(updateCountdown, 1000);
 })();
 </script>
+
