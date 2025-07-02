@@ -282,18 +282,7 @@
   var total = imgs.length / 2; // since we duplicate for looping
   // Set initial scroll position to the first image
   gallery.scrollTop = 0;
-  // On scroll, if at the end, reset to the start seamlessly
-  gallery.addEventListener('scroll', function() {
-    if (gallery.scrollTop >= imgHeight * total) {
-      gallery.scrollTop = 0;
-    }
-    if (gallery.scrollTop === 0) {
-      // If user scrolls up past the first, jump to the end
-      if (gallery.scrollTop < 0) {
-        gallery.scrollTop = imgHeight * total;
-      }
-    }
-  });
+  // No automatic scroll reset - let it scroll naturally
 })();
 // Countdown timer
 (function() {
