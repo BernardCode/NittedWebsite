@@ -274,22 +274,28 @@
   </div>
 </div>
 <script>
-// Smooth infinite vertical scroll gallery controlled by page scroll
+// Infinite vertical scroll gallery controlled by page scroll
 (function() {
   var gallery = document.getElementById('nitted-vert-gallery');
   var imgs = gallery.querySelectorAll('.nitted-vert-img');
   var imgHeight = imgs[0].offsetHeight + 22; // 22px margin
+  var currentIndex = 0;
   var totalImages = imgs.length;
-  var scrollPosition = 0;
   
-  // Handle page scroll to control gallery smoothly
-  function handleScroll(e) {
-    e.preventDefault();
+  // Handle page scroll to control gallery
+  var isScrolling = false;
+  var scrollTimeout;
+  
+  function handleScroll() {
+    if (isScrolling) return;
+    isScrolling = true;
     
-    // Get scroll delta and apply it to gallery
-    var delta = e.deltaY || e.detail || e.wheelDelta;
-    scrollPosition += delta * 0.5; // Adjust sensitivity
+    // Get scroll direction
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var direction = scrollTop > (window.lastScrollTop || 0) ? 1 : -1;
+    window.lastScrollTop = scrollTop;
     
+<<<<<<< HEAD
     // Handle infinite scroll by duplicating content
     var maxScroll = imgHeight * totalImages;
     
@@ -301,25 +307,44 @@
     
     // Apply smooth scroll to gallery
     gallery.style.transform = 'translateY(-' + scrollPosition + 'px)';
+=======
+    // Update gallery position
+    if (direction > 0) {
+      // Scrolling down
+      currentIndex = (currentIndex + 1) % totalImages;
+    } else {
+      // Scrolling up
+      currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+    }
+    
+    // Update gallery scroll position
+    gallery.scrollTop = currentIndex * imgHeight;
+    
+    // Reset scroll flag after delay
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function() {
+      isScrolling = false;
+    }, 100);
+>>>>>>> parent of c1c9774 (Update main-page.liquid)
   }
   
   // Listen for wheel events on the entire page
-  document.addEventListener('wheel', handleScroll, { passive: false });
+  document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    handleScroll();
+  }, { passive: false });
   
-  // Handle touch scrolling on mobile
+  // Listen for touch events on mobile
   var touchStartY = 0;
-  var touchStartScroll = 0;
-  
   document.addEventListener('touchstart', function(e) {
     touchStartY = e.touches[0].clientY;
-    touchStartScroll = scrollPosition;
   });
   
-  document.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    var touchY = e.touches[0].clientY;
-    var deltaY = touchStartY - touchY;
+  document.addEventListener('touchend', function(e) {
+    var touchEndY = e.changedTouches[0].clientY;
+    var diff = touchStartY - touchEndY;
     
+<<<<<<< HEAD
     scrollPosition = touchStartScroll + deltaY;
     
     // Handle infinite scroll
@@ -333,6 +358,19 @@
     
     gallery.style.transform = 'translateY(-' + scrollPosition + 'px)';
   }, { passive: false });
+=======
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      if (diff > 0) {
+        // Swipe up
+        currentIndex = (currentIndex + 1) % totalImages;
+      } else {
+        // Swipe down
+        currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+      }
+      gallery.scrollTop = currentIndex * imgHeight;
+    }
+  });
+>>>>>>> parent of c1c9774 (Update main-page.liquid)
   
   // Initialize gallery position
   gallery.style.transform = 'translateY(0px)';
