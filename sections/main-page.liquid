@@ -331,7 +331,6 @@
     var imgs = Array.from(inner.children);
     var vw = outer.offsetWidth;
     var totalImgWidth = imgWidth + 2 * imgMargin;
-    var centerX = vw / 2;
     // The index of the image at the leftmost slot
     var firstIdx = Math.floor(state.scroll / totalImgWidth);
     var offsetPx = state.scroll % totalImgWidth;
@@ -341,7 +340,8 @@
       var img = imgs[i];
       if (img.src !== imageSources[srcIdx]) img.src = imageSources[srcIdx];
       img.alt = 'Nitted product photo ' + (srcIdx + 1);
-      var x = (i * totalImgWidth) - offsetPx + centerX - totalImgWidth / 2;
+      // Position slot 0 at the left edge, lay out to the right
+      var x = (i * totalImgWidth) - offsetPx;
       img.style.left = x + 'px';
     }
   }
