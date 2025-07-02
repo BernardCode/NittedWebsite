@@ -75,7 +75,7 @@
     padding: 0;
     height: 100vh;
     min-height: 100vh;
-    overflow: hidden;
+    overflow: auto;
   }
   body, .nitted-main {
     height: 100vh;
@@ -84,12 +84,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow: auto;
     background: var(--beige) !important;
   }
   .nitted-logo-img {
     display: block;
-    position: absolute;
+    position: fixed;
     top: 2.2rem;
     left: 0;
     right: 0;
@@ -106,8 +106,9 @@
     align-items: center;
     justify-content: center;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     padding-top: 7.5rem;
+    padding-bottom: 2rem;
     box-sizing: border-box;
     background: var(--beige) !important;
   }
@@ -201,7 +202,7 @@
     align-items: center;
     background: var(--beige);
     min-height: 320px;
-    overflow-y: hidden;
+    overflow: hidden;
     position: relative;
     margin-bottom: 0;
   }
@@ -210,13 +211,8 @@
     flex-direction: column;
     align-items: center;
     height: 320px;
-    overflow-y: scroll;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .nitted-vert-gallery::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
+    position: relative;
   }
   .nitted-vert-img {
     width: 400px;
@@ -270,39 +266,111 @@
       <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
       <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
       <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
+      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
+      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
+      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
+      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
     </div>
   </div>
 </div>
 <script>
-// Infinite vertical scroll gallery (no autoscroll, true loop)
+// Infinite vertical scroll gallery controlled by page scroll
 (function() {
   var gallery = document.getElementById('nitted-vert-gallery');
   var imgs = gallery.querySelectorAll('.nitted-vert-img');
   var imgHeight = imgs[0].offsetHeight + 22; // 22px margin
-  var total = imgs.length / 2; // since we duplicate for looping
-  // Set initial scroll position to the first image
+  var currentIndex = 0;
+  var totalImages = imgs.length;
+  
+  // Handle page scroll to control gallery
+  var isScrolling = false;
+  var scrollTimeout;
+  
+  function handleScroll() {
+    if (isScrolling) return;
+    isScrolling = true;
+    
+    // Get scroll direction
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var direction = scrollTop > (window.lastScrollTop || 0) ? 1 : -1;
+    window.lastScrollTop = scrollTop;
+    
+    // Update gallery position
+    if (direction > 0) {
+      // Scrolling down
+      currentIndex = (currentIndex + 1) % totalImages;
+    } else {
+      // Scrolling up
+      currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+    }
+    
+    // Update gallery scroll position
+    gallery.scrollTop = currentIndex * imgHeight;
+    
+    // Reset scroll flag after delay
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function() {
+      isScrolling = false;
+    }, 100);
+  }
+  
+  // Listen for wheel events on the entire page
+  document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    handleScroll();
+  }, { passive: false });
+  
+  // Listen for touch events on mobile
+  var touchStartY = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartY = e.touches[0].clientY;
+  });
+  
+  document.addEventListener('touchend', function(e) {
+    var touchEndY = e.changedTouches[0].clientY;
+    var diff = touchStartY - touchEndY;
+    
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      if (diff > 0) {
+        // Swipe up
+        currentIndex = (currentIndex + 1) % totalImages;
+      } else {
+        // Swipe down
+        currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+      }
+      gallery.scrollTop = currentIndex * imgHeight;
+    }
+  });
+  
+  // Initialize gallery position
   gallery.scrollTop = 0;
-  // No automatic scroll reset - let it scroll naturally
 })();
+
 // Countdown timer
 (function() {
   var countdownEl = document.getElementById('nitted-countdown');
   // Set to August 1st, 2024, midnight local time
   var target = new Date(2024, 7, 1, 0, 0, 0, 0); // Month is 0-indexed (7 = August)
+  
   function updateCountdown() {
     var now = new Date();
     var diff = target - now;
+    
     if (diff <= 0) {
       countdownEl.textContent = 'Drop is live!';
       return;
     }
+    
     var days = Math.floor(diff / (1000*60*60*24));
     var hours = Math.floor((diff / (1000*60*60)) % 24);
     var mins = Math.floor((diff / (1000*60)) % 60);
     var secs = Math.floor((diff / 1000) % 60);
+    
     countdownEl.textContent = days + 'd ' + hours + 'h ' + mins + 'm ' + secs + 's';
   }
-  setInterval(updateCountdown, 1000);
+  
+  // Update immediately and then every second
   updateCountdown();
+  setInterval(updateCountdown, 1000);
 })();
 </script>
