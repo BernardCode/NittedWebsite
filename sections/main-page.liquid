@@ -273,7 +273,7 @@
   </div>
 </div>
 <script>
-// Virtualized infinite horizontal scroll gallery
+// Truly infinite, non-cropped horizontal scroll gallery
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -283,19 +283,17 @@
   ];
   var galleryScroll = document.getElementById('nitted-vert-gallery-scroll');
   var gallery = document.getElementById('nitted-vert-gallery');
-  var imgWidth = 400; // fallback, will update after first render
+  var imgHeight = 260; // fixed height for all images
   var buffer = 2; // Number of images left/right of viewport to keep
 
-  // Change flex direction to row for horizontal
+  // Set up horizontal flex
   gallery.style.display = 'flex';
   gallery.style.flexDirection = 'row';
   gallery.style.alignItems = 'center';
-
-  // Set scroll direction to horizontal
   galleryScroll.style.overflowX = 'scroll';
   galleryScroll.style.overflowY = 'hidden';
   galleryScroll.style.whiteSpace = 'nowrap';
-  galleryScroll.style.height = '';
+  galleryScroll.style.height = imgHeight + 'px';
   galleryScroll.style.width = '100vw';
 
   // Helper for modulo
@@ -313,8 +311,9 @@
     img.loading = 'lazy';
     img.dataset.idx = idx;
     img.style.display = 'inline-block';
-    img.style.width = imgWidth + 'px';
-    img.style.height = 'auto';
+    img.style.height = imgHeight + 'px';
+    img.style.width = 'auto';
+    img.style.objectFit = 'contain';
     img.style.marginRight = '22px';
     return img;
   }
@@ -325,12 +324,10 @@
   // Initial render: fill with enough images to cover viewport + buffer
   function initialRender() {
     gallery.innerHTML = '';
-    var n = Math.ceil(galleryScroll.offsetWidth / imgWidth) + 2 * buffer;
+    var n = Math.ceil(galleryScroll.offsetWidth / imgHeight) + 2 * buffer;
     for (var i = 0; i < n; i++) {
       gallery.appendChild(createImg(leftIdx + i));
     }
-    var firstImg = gallery.querySelector('.nitted-vert-img');
-    if (firstImg) imgWidth = firstImg.offsetWidth || imgWidth;
     // Center scroll on the first image
     galleryScroll.scrollLeft = 0;
   }
@@ -343,29 +340,28 @@
     if (imgs.length === 0) return;
     var firstImg = imgs[0];
     var lastImg = imgs[imgs.length - 1];
-    var nVisible = Math.ceil(galleryScroll.offsetWidth / imgWidth);
+    var nVisible = Math.ceil(galleryScroll.offsetWidth / imgHeight);
     var minImages = nVisible + 2 * buffer;
 
-    // If scrolled near right, append next image and remove from left
-    while (lastImg.offsetLeft < scrollLeft + galleryScroll.offsetWidth + buffer * imgWidth) {
+    // If scrolled near right, append next image and remove from left if too many
+    while (lastImg.getBoundingClientRect().right < galleryScroll.getBoundingClientRect().right + buffer * imgHeight) {
       var nextIdx = parseInt(lastImg.dataset.idx, 10) + 1;
       gallery.appendChild(createImg(nextIdx));
-      // Remove from left if too many
-      if (gallery.children.length > minImages) {
+      if (gallery.children.length > minImages + buffer) {
         gallery.removeChild(gallery.firstChild);
         leftIdx++;
       }
       imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
       lastImg = imgs[imgs.length - 1];
     }
-    // If scrolled near left, prepend previous image and remove from right
-    while (firstImg.offsetLeft > scrollLeft - buffer * imgWidth) {
+    // If scrolled near left, prepend previous image and remove from right if too many
+    while (firstImg.getBoundingClientRect().left > galleryScroll.getBoundingClientRect().left - buffer * imgHeight) {
       var prevIdx = parseInt(firstImg.dataset.idx, 10) - 1;
-      gallery.insertBefore(createImg(prevIdx), firstImg);
+      var newImg = createImg(prevIdx);
+      gallery.insertBefore(newImg, firstImg);
       // Adjust scroll so content doesn't jump
-      galleryScroll.scrollLeft += imgWidth + 22;
-      // Remove from right if too many
-      if (gallery.children.length > minImages) {
+      galleryScroll.scrollLeft += newImg.getBoundingClientRect().width + 22;
+      if (gallery.children.length > minImages + buffer) {
         gallery.removeChild(gallery.lastChild);
       }
       imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
@@ -375,8 +371,6 @@
 
   galleryScroll.addEventListener('scroll', onScroll);
   window.addEventListener('resize', function() {
-    var firstImg = gallery.querySelector('.nitted-vert-img');
-    if (firstImg) imgWidth = firstImg.offsetWidth || imgWidth;
     initialRender();
   });
 })();
