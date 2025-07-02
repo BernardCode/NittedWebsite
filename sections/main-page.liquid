@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Glitch-free, infinite, virtualized, drag-to-scroll horizontal gallery with autoscroll, max speed, and center scaling
+// Glitch-free, infinite, virtualized, drag-to-scroll horizontal gallery with autoscroll and max speed (no zoom)
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -279,9 +279,6 @@
   var buffer = 1;
   var imgWidth = imgHeight;
   var MAX_VELOCITY = 3;
-  var MIN_SCALE = 0.8;
-  var MAX_SCALE = 1.3;
-  var SCALE_DISTANCE = 0.5;
   var state = {
     offset: 0,
     dragging: false,
@@ -308,11 +305,11 @@
     img.className = 'nitted-infinite-img';
     img.draggable = false;
     img.dataset.idx = idx;
-    img.style.transition = 'transform 0.25s cubic-bezier(.4,0,.2,1)';
     img.style.position = 'absolute';
     img.style.left = '0';
     img.style.top = '50%';
     img.style.transform = 'translateY(-50%)';
+    img.style.transition = '';
     return img;
   }
 
@@ -331,10 +328,10 @@
       imgWidth = imgHeight;
     }
     state.offset = 0;
-    updatePositionsAndScale();
+    updatePositions();
   }
 
-  function updatePositionsAndScale() {
+  function updatePositions() {
     var imgs = Array.from(inner.children);
     var vw = outer.offsetWidth;
     var totalImgWidth = imgWidth + 2 * imgMargin;
@@ -343,32 +340,15 @@
       var idx = parseInt(img.dataset.idx, 10);
       var pos = (idx - state.leftMostIdx) * totalImgWidth + state.offset;
       img.style.left = (pos + centerX - imgWidth / 2) + 'px';
-      // Scaling
-      var dist = Math.abs(pos + imgWidth / 2);
-      var norm = dist / (vw * SCALE_DISTANCE / 2);
-      norm = Math.min(norm, 1);
-      var scale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * (1 - norm * norm);
-      img.style.transform = 'translateY(-50%) scale(' + scale + ')';
-      img.style.zIndex = Math.round(scale * 100);
+      img.style.transform = 'translateY(-50%)';
+      img.style.zIndex = 1;
     });
   }
 
   function recycleIfNeeded() {
-    if (state.dragging) return; // Only recycle when not dragging
     var imgs = Array.from(inner.children);
     var totalImgWidth = imgWidth + 2 * imgMargin;
     var vw = outer.offsetWidth;
-    // Clamp offset to prevent floating point drift
-    if (Math.abs(state.offset) > 10000) {
-      var imgsOnScreen = imgs.length;
-      state.offset = 0;
-      state.leftMostIdx = 0;
-      inner.innerHTML = '';
-      for (var i = 0; i < imgsOnScreen; i++) {
-        inner.appendChild(createImg(state.leftMostIdx + i));
-      }
-      imgs = Array.from(inner.children);
-    }
     // Recycle right
     while ((state.leftMostIdx + imgs.length - 1) * totalImgWidth + state.offset < -vw / 2) {
       inner.removeChild(inner.firstChild);
@@ -393,7 +373,7 @@
     if (!state.dragging) {
       state.offset -= state.velocity;
     }
-    updatePositionsAndScale();
+    updatePositions();
     recycleIfNeeded();
     state.rafId = requestAnimationFrame(rafUpdate);
   }
@@ -420,7 +400,7 @@
     }
     state.lastX = x;
     state.lastMoveTime = now;
-    updatePositionsAndScale();
+    updatePositions();
   }
   function onPointerUp(e) {
     state.dragging = false;
