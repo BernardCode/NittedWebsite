@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Truly infinite, equally spaced, flexbox-based horizontal gallery with autoscroll and max speed
+// Robust, truly infinite, virtualized horizontal gallery (fixed slots, virtual scroll, no DOM jumps)
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -277,14 +277,13 @@
   var imgHeight = window.innerWidth < 700 ? 100 : 220;
   var imgWidth = window.innerWidth < 700 ? 160 : 320;
   var imgMargin = window.innerWidth < 700 ? 8 : 18;
-  var buffer = 2;
+  var slotCount = 12; // Always render this many slots
   var MAX_VELOCITY = 3;
   var state = {
-    offset: 0, // px offset for translateX
+    scroll: 0, // virtual scroll position in px
     dragging: false,
     dragStartX: 0,
-    dragStartOffset: 0,
-    leftMostIdx: 0, // index of the leftmost image in the DOM
+    dragStartScroll: 0,
     rafId: null,
     velocity: 0.15,
     lastX: 0,
@@ -306,66 +305,44 @@
     return ((n % m) + m) % m;
   }
 
-  function createImg(idx) {
+  function createSlot() {
     var img = document.createElement('img');
-    var safeIdx = mod(idx, imageSources.length);
-    img.src = imageSources[safeIdx];
-    img.alt = 'Nitted product photo ' + (safeIdx + 1);
     img.className = 'nitted-infinite-img';
     img.draggable = false;
-    img.dataset.idx = idx;
     img.style.width = imgWidth + 'px';
     img.style.height = imgHeight + 'px';
     img.style.objectFit = 'contain';
     img.style.margin = '0 ' + imgMargin + 'px';
     img.style.flex = '0 0 auto';
+    img.style.position = 'absolute';
+    img.style.top = '50%';
+    img.style.transform = 'translateY(-50%)';
     return img;
   }
 
-  function fillImages() {
+  function fillSlots() {
     inner.innerHTML = '';
-    var vw = outer.offsetWidth;
-    var n = Math.ceil(vw / (imgWidth + 2 * imgMargin)) + 2 * buffer;
-    for (var i = 0; i < n; i++) {
-      var img = createImg(state.leftMostIdx + i);
-      inner.appendChild(img);
+    for (var i = 0; i < slotCount; i++) {
+      inner.appendChild(createSlot());
     }
-    state.offset = 0;
-    updatePositions();
   }
 
-  function updatePositions() {
-    inner.style.transform = 'translateX(' + state.offset + 'px)';
-  }
-
-  function ensureImages() {
+  function updateSlots() {
     var imgs = Array.from(inner.children);
     var vw = outer.offsetWidth;
     var totalImgWidth = imgWidth + 2 * imgMargin;
-    // Add images to the right if needed
-    while ((imgs.length * totalImgWidth + state.offset) < vw + buffer * totalImgWidth) {
-      var newIdx = parseInt(imgs[imgs.length - 1]?.dataset.idx || state.leftMostIdx, 10) + 1;
-      inner.appendChild(createImg(newIdx));
-      imgs = Array.from(inner.children);
-    }
-    // Add images to the left if needed
-    while ((state.offset > buffer * totalImgWidth)) {
-      var newIdx = parseInt(imgs[0].dataset.idx, 10) - 1;
-      inner.insertBefore(createImg(newIdx), inner.firstChild);
-      state.leftMostIdx--;
-      state.offset -= totalImgWidth;
-      imgs = Array.from(inner.children);
-    }
-    // Remove images from left if too many
-    while (imgs.length > 2 * buffer + Math.ceil(vw / totalImgWidth) && (imgs[0].getBoundingClientRect().right < outer.getBoundingClientRect().left - totalImgWidth)) {
-      inner.removeChild(inner.firstChild);
-      state.leftMostIdx++;
-      imgs = Array.from(inner.children);
-    }
-    // Remove images from right if too many
-    while (imgs.length > 2 * buffer + Math.ceil(vw / totalImgWidth) && (imgs[imgs.length-1].getBoundingClientRect().left > outer.getBoundingClientRect().right + totalImgWidth)) {
-      inner.removeChild(inner.lastChild);
-      imgs = Array.from(inner.children);
+    var centerX = vw / 2;
+    // The index of the image at the leftmost slot
+    var firstIdx = Math.floor(state.scroll / totalImgWidth);
+    var offsetPx = state.scroll % totalImgWidth;
+    for (var i = 0; i < slotCount; i++) {
+      var imgIdx = firstIdx + i;
+      var srcIdx = mod(imgIdx, imageSources.length);
+      var img = imgs[i];
+      if (img.src !== imageSources[srcIdx]) img.src = imageSources[srcIdx];
+      img.alt = 'Nitted product photo ' + (srcIdx + 1);
+      var x = (i * totalImgWidth) - offsetPx + centerX - totalImgWidth / 2;
+      img.style.left = x + 'px';
     }
   }
 
@@ -373,17 +350,16 @@
     if (state.velocity > MAX_VELOCITY) state.velocity = MAX_VELOCITY;
     if (state.velocity < -MAX_VELOCITY) state.velocity = -MAX_VELOCITY;
     if (!state.dragging) {
-      state.offset -= state.velocity;
+      state.scroll += state.velocity;
     }
-    updatePositions();
-    ensureImages();
+    updateSlots();
     state.rafId = requestAnimationFrame(rafUpdate);
   }
 
   function onPointerDown(e) {
     state.dragging = true;
     state.dragStartX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-    state.dragStartOffset = state.offset;
+    state.dragStartScroll = state.scroll;
     state.lastX = state.dragStartX;
     state.lastMoveTime = Date.now();
     state.userVelocity = 0;
@@ -394,16 +370,15 @@
     if (!state.dragging) return;
     var x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
     var dx = x - state.dragStartX;
-    state.offset = state.dragStartOffset + dx;
+    state.scroll = state.dragStartScroll - dx;
     var now = Date.now();
     var dt = now - state.lastMoveTime;
     if (dt > 0) {
-      state.userVelocity = (x - state.lastX) / dt * 16;
+      state.userVelocity = -(x - state.lastX) / dt * 16;
     }
     state.lastX = x;
     state.lastMoveTime = now;
-    updatePositions();
-    ensureImages();
+    updateSlots();
   }
   function onPointerUp(e) {
     state.dragging = false;
@@ -433,10 +408,12 @@
   window.addEventListener('touchend', onPointerUp);
   outer.addEventListener('dragstart', function(e) { e.preventDefault(); });
   window.addEventListener('resize', function() {
-    fillImages();
+    fillSlots();
+    updateSlots();
   });
 
-  fillImages();
+  fillSlots();
+  updateSlots();
   rafUpdate();
 })();
 
