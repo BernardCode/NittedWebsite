@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Optimized, truly infinite, virtualized, drag-to-scroll horizontal gallery
+// Optimized, truly infinite, virtualized, drag-to-scroll horizontal gallery with slow autoscroll
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -276,15 +276,20 @@
   var inner = document.getElementById('nitted-infinite-gallery-inner');
   var imgHeight = window.innerWidth < 700 ? 100 : 220;
   var imgMargin = window.innerWidth < 700 ? 8 : 18;
-  var buffer = 1; // minimal buffer for performance
-  var imgWidth = imgHeight; // fallback, will update after first render
+  var buffer = 1;
+  var imgWidth = imgHeight;
   var state = {
-    offset: 0, // virtual scroll offset in px
+    offset: 0,
     dragging: false,
     dragStartX: 0,
     dragStartOffset: 0,
-    leftMostIdx: 0, // index of leftmost image
-    rafId: null
+    leftMostIdx: 0,
+    rafId: null,
+    velocity: 0.15, // px per frame (autoscroll speed)
+    lastX: 0,
+    lastMoveTime: 0,
+    userVelocity: 0,
+    easing: false
   };
 
   function mod(n, m) {
@@ -324,13 +329,10 @@
     inner.style.transform = 'translateX(' + state.offset + 'px)';
   }
 
-  // Efficient recycling: only when offset passes a full image width
   function recycleIfNeeded() {
     var imgs = Array.from(inner.children);
     var totalImgWidth = imgWidth + 2 * imgMargin;
-    // Recycle right
     while (state.offset <= -totalImgWidth) {
-      // Remove leftmost, add rightmost
       inner.removeChild(inner.firstChild);
       var newIdx = parseInt(imgs[imgs.length - 1].dataset.idx, 10) + 1;
       inner.appendChild(createImg(newIdx));
@@ -338,9 +340,7 @@
       state.offset += totalImgWidth;
       imgs = Array.from(inner.children);
     }
-    // Recycle left
     while (state.offset >= totalImgWidth) {
-      // Remove rightmost, add leftmost
       inner.removeChild(inner.lastChild);
       var newIdx = parseInt(imgs[0].dataset.idx, 10) - 1;
       inner.insertBefore(createImg(newIdx), inner.firstChild);
@@ -350,14 +350,14 @@
     }
   }
 
-  // Animation frame update
+  // Animation frame update with autoscroll
   function rafUpdate() {
+    if (!state.dragging) {
+      state.offset -= state.velocity;
+    }
     updatePositions();
     recycleIfNeeded();
-    state.rafId = null;
-  }
-  function requestUpdate() {
-    if (!state.rafId) state.rafId = requestAnimationFrame(rafUpdate);
+    state.rafId = requestAnimationFrame(rafUpdate);
   }
 
   // Drag logic
@@ -365,6 +365,10 @@
     state.dragging = true;
     state.dragStartX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
     state.dragStartOffset = state.offset;
+    state.lastX = state.dragStartX;
+    state.lastMoveTime = Date.now();
+    state.userVelocity = 0;
+    state.easing = false;
     outer.style.cursor = 'grabbing';
   }
   function onPointerMove(e) {
@@ -372,11 +376,38 @@
     var x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
     var dx = x - state.dragStartX;
     state.offset = state.dragStartOffset + dx;
-    requestUpdate();
+    // Calculate user velocity
+    var now = Date.now();
+    var dt = now - state.lastMoveTime;
+    if (dt > 0) {
+      state.userVelocity = (x - state.lastX) / dt * 16; // px per frame
+    }
+    state.lastX = x;
+    state.lastMoveTime = now;
+    updatePositions();
+    recycleIfNeeded();
   }
   function onPointerUp(e) {
     state.dragging = false;
     outer.style.cursor = '';
+    // Ease velocity back to autoscroll
+    state.easing = true;
+    easeToAutoscroll();
+  }
+
+  // Ease velocity back to autoscroll after drag
+  function easeToAutoscroll() {
+    if (!state.easing) return;
+    // Gradually reduce userVelocity to 0, then set velocity to autoscroll
+    if (Math.abs(state.userVelocity) > 0.2) {
+      state.velocity = state.userVelocity * 0.95 + 0.15 * 0.05; // blend toward autoscroll
+      state.userVelocity *= 0.95;
+      requestAnimationFrame(easeToAutoscroll);
+    } else {
+      state.velocity = 0.15; // autoscroll speed
+      state.userVelocity = 0;
+      state.easing = false;
+    }
   }
 
   // Mouse events
@@ -397,6 +428,7 @@
   });
 
   fillImages();
+  rafUpdate();
 })();
 
 // Countdown timer
