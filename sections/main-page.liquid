@@ -202,7 +202,7 @@
     align-items: center;
     background: var(--beige);
     min-height: 320px;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     margin-bottom: 0;
   }
@@ -210,8 +210,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 320px;
-    overflow: hidden;
+    height: auto;
+    overflow: visible;
     position: relative;
   }
   .nitted-vert-img {
@@ -290,8 +290,8 @@
     var delta = e.deltaY || e.detail || e.wheelDelta;
     scrollPosition += delta * 0.5; // Adjust sensitivity
     
-    // Handle infinite scroll
-    var maxScroll = imgHeight * (totalImages - 1);
+    // Handle infinite scroll by duplicating content
+    var maxScroll = imgHeight * totalImages;
     
     if (scrollPosition > maxScroll) {
       scrollPosition = scrollPosition - maxScroll;
@@ -300,7 +300,7 @@
     }
     
     // Apply smooth scroll to gallery
-    gallery.scrollTop = scrollPosition;
+    gallery.style.transform = 'translateY(-' + scrollPosition + 'px)';
   }
   
   // Listen for wheel events on the entire page
@@ -323,7 +323,7 @@
     scrollPosition = touchStartScroll + deltaY;
     
     // Handle infinite scroll
-    var maxScroll = imgHeight * (totalImages - 1);
+    var maxScroll = imgHeight * totalImages;
     
     if (scrollPosition > maxScroll) {
       scrollPosition = scrollPosition - maxScroll;
@@ -331,11 +331,11 @@
       scrollPosition = maxScroll + scrollPosition;
     }
     
-    gallery.scrollTop = scrollPosition;
+    gallery.style.transform = 'translateY(-' + scrollPosition + 'px)';
   }, { passive: false });
   
   // Initialize gallery position
-  gallery.scrollTop = 0;
+  gallery.style.transform = 'translateY(0px)';
 })();
 
 // Countdown timer
