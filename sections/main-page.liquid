@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Glitch-free, infinite, virtualized, drag-to-scroll horizontal gallery with autoscroll and max speed (no zoom)
+// Truly infinite, equally spaced, flexbox-based horizontal gallery with autoscroll and max speed
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -275,16 +275,16 @@
   var outer = document.querySelector('.nitted-infinite-gallery-outer');
   var inner = document.getElementById('nitted-infinite-gallery-inner');
   var imgHeight = window.innerWidth < 700 ? 100 : 220;
+  var imgWidth = window.innerWidth < 700 ? 160 : 320;
   var imgMargin = window.innerWidth < 700 ? 8 : 18;
-  var buffer = 1;
-  var imgWidth = imgHeight;
+  var buffer = 2;
   var MAX_VELOCITY = 3;
   var state = {
-    offset: 0,
+    offset: 0, // px offset for translateX
     dragging: false,
     dragStartX: 0,
     dragStartOffset: 0,
-    leftMostIdx: 0,
+    leftMostIdx: 0, // index of the leftmost image in the DOM
     rafId: null,
     velocity: 0.15,
     lastX: 0,
@@ -292,6 +292,15 @@
     userVelocity: 0,
     easing: false
   };
+
+  // Set up flexbox layout
+  inner.style.display = 'flex';
+  inner.style.flexDirection = 'row';
+  inner.style.alignItems = 'center';
+  inner.style.position = 'absolute';
+  inner.style.left = '0';
+  inner.style.top = '0';
+  inner.style.height = '100%';
 
   function mod(n, m) {
     return ((n % m) + m) % m;
@@ -305,64 +314,57 @@
     img.className = 'nitted-infinite-img';
     img.draggable = false;
     img.dataset.idx = idx;
-    img.style.position = 'absolute';
-    img.style.left = '0';
-    img.style.top = '50%';
-    img.style.transform = 'translateY(-50%)';
-    img.style.transition = '';
+    img.style.width = imgWidth + 'px';
+    img.style.height = imgHeight + 'px';
+    img.style.objectFit = 'contain';
+    img.style.margin = '0 ' + imgMargin + 'px';
+    img.style.flex = '0 0 auto';
     return img;
   }
 
   function fillImages() {
     inner.innerHTML = '';
     var vw = outer.offsetWidth;
-    var n = Math.ceil(vw / (imgHeight + 2 * imgMargin)) + 2 * buffer;
+    var n = Math.ceil(vw / (imgWidth + 2 * imgMargin)) + 2 * buffer;
     for (var i = 0; i < n; i++) {
       var img = createImg(state.leftMostIdx + i);
       inner.appendChild(img);
-    }
-    var firstImg = inner.querySelector('.nitted-infinite-img');
-    if (firstImg) {
-      imgWidth = firstImg.offsetWidth || imgHeight;
-    } else {
-      imgWidth = imgHeight;
     }
     state.offset = 0;
     updatePositions();
   }
 
   function updatePositions() {
-    var imgs = Array.from(inner.children);
-    var vw = outer.offsetWidth;
-    var totalImgWidth = imgWidth + 2 * imgMargin;
-    var centerX = vw / 2;
-    imgs.forEach(function(img, i) {
-      var idx = parseInt(img.dataset.idx, 10);
-      var pos = (idx - state.leftMostIdx) * totalImgWidth + state.offset;
-      img.style.left = (pos + centerX - imgWidth / 2) + 'px';
-      img.style.transform = 'translateY(-50%)';
-      img.style.zIndex = 1;
-    });
+    inner.style.transform = 'translateX(' + state.offset + 'px)';
   }
 
-  function recycleIfNeeded() {
+  function ensureImages() {
     var imgs = Array.from(inner.children);
-    var totalImgWidth = imgWidth + 2 * imgMargin;
     var vw = outer.offsetWidth;
-    // Recycle right
-    while ((state.leftMostIdx + imgs.length - 1) * totalImgWidth + state.offset < -vw / 2) {
-      inner.removeChild(inner.firstChild);
-      var newIdx = parseInt(imgs[imgs.length - 1].dataset.idx, 10) + 1;
+    var totalImgWidth = imgWidth + 2 * imgMargin;
+    // Add images to the right if needed
+    while ((imgs.length * totalImgWidth + state.offset) < vw + buffer * totalImgWidth) {
+      var newIdx = parseInt(imgs[imgs.length - 1]?.dataset.idx || state.leftMostIdx, 10) + 1;
       inner.appendChild(createImg(newIdx));
-      state.leftMostIdx++;
       imgs = Array.from(inner.children);
     }
-    // Recycle left
-    while (state.leftMostIdx * totalImgWidth + state.offset > vw / 2) {
-      inner.removeChild(inner.lastChild);
+    // Add images to the left if needed
+    while ((state.offset > buffer * totalImgWidth)) {
       var newIdx = parseInt(imgs[0].dataset.idx, 10) - 1;
       inner.insertBefore(createImg(newIdx), inner.firstChild);
       state.leftMostIdx--;
+      state.offset -= totalImgWidth;
+      imgs = Array.from(inner.children);
+    }
+    // Remove images from left if too many
+    while (imgs.length > 2 * buffer + Math.ceil(vw / totalImgWidth) && (imgs[0].getBoundingClientRect().right < outer.getBoundingClientRect().left - totalImgWidth)) {
+      inner.removeChild(inner.firstChild);
+      state.leftMostIdx++;
+      imgs = Array.from(inner.children);
+    }
+    // Remove images from right if too many
+    while (imgs.length > 2 * buffer + Math.ceil(vw / totalImgWidth) && (imgs[imgs.length-1].getBoundingClientRect().left > outer.getBoundingClientRect().right + totalImgWidth)) {
+      inner.removeChild(inner.lastChild);
       imgs = Array.from(inner.children);
     }
   }
@@ -374,7 +376,7 @@
       state.offset -= state.velocity;
     }
     updatePositions();
-    recycleIfNeeded();
+    ensureImages();
     state.rafId = requestAnimationFrame(rafUpdate);
   }
 
@@ -401,6 +403,7 @@
     state.lastX = x;
     state.lastMoveTime = now;
     updatePositions();
+    ensureImages();
   }
   function onPointerUp(e) {
     state.dragging = false;
