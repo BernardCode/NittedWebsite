@@ -234,9 +234,9 @@
     .nitted-hero-title { font-size: 1.4rem; }
     .nitted-email-form { max-width: 98vw; }
     .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
-    .nitted-vert-img { width: 240px; height: 120px; }
-    .nitted-vert-gallery-container { min-height: 120px; }
-    .nitted-vert-gallery { height: 120px; }
+    .nitted-vert-gallery-container { min-height: 120px; height: 120px; overflow: hidden; }
+    .nitted-vert-gallery-scroll { height: 120px !important; overflow-y: scroll; }
+    .nitted-vert-img { width: 100vw; max-width: 240px; height: 120px; margin-bottom: 0; }
   }
 </style>
 <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
@@ -260,82 +260,66 @@
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
   <div class="nitted-drop-text">Dropping August 1st</div>
   <div class="nitted-countdown" id="nitted-countdown"></div>
-  <div class="nitted-vert-gallery-container">
-    <div class="nitted-vert-gallery" id="nitted-vert-gallery">
-      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
-      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
+  <div class="nitted-vert-gallery-container" style="height: 260px; max-width: 100vw; overflow: hidden; position: relative;">
+    <div class="nitted-vert-gallery-scroll" id="nitted-vert-gallery-scroll" style="height: 100%; overflow-y: scroll; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
+      <div class="nitted-vert-gallery" id="nitted-vert-gallery">
+        <!-- Images will be duplicated by JS for infinite effect -->
+        <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
+        <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
+        <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
+        <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
+      </div>
     </div>
   </div>
 </div>
 <script>
-// Smooth infinite vertical scroll gallery controlled by page scroll
+// Infinite vertical scroll gallery with smooth effect and seamless looping
 (function() {
+  var galleryScroll = document.getElementById('nitted-vert-gallery-scroll');
   var gallery = document.getElementById('nitted-vert-gallery');
-  var imgs = gallery.querySelectorAll('.nitted-vert-img');
-  var imgHeight = imgs[0].offsetHeight + 22; // 22px margin
-  var totalImages = imgs.length;
-  var scrollPosition = 0;
-  
-  // Handle page scroll to control gallery smoothly
-  function handleScroll(e) {
-    e.preventDefault();
-    
-    // Get scroll delta and apply it to gallery
-    var delta = e.deltaY || e.detail || e.wheelDelta;
-    scrollPosition += delta * 0.5; // Adjust sensitivity
-    
-    // Handle infinite scroll by duplicating content
-    var maxScroll = imgHeight * totalImages;
-    
-    if (scrollPosition > maxScroll) {
-      scrollPosition = scrollPosition - maxScroll;
-    } else if (scrollPosition < 0) {
-      scrollPosition = maxScroll + scrollPosition;
-    }
-    
-    // Apply smooth scroll to gallery
-    gallery.style.transform = 'translateY(-' + scrollPosition + 'px)';
+  var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+  var imgHeight = imgs[0].offsetHeight || 260; // fallback
+  var visibleHeight = imgHeight;
+
+  // Duplicate images for infinite effect
+  function duplicateImages() {
+    var fragStart = document.createDocumentFragment();
+    var fragEnd = document.createDocumentFragment();
+    imgs.forEach(function(img) {
+      fragEnd.appendChild(img.cloneNode(true));
+    });
+    imgs.forEach(function(img) {
+      fragStart.appendChild(img.cloneNode(true));
+    });
+    gallery.insertBefore(fragStart, gallery.firstChild);
+    gallery.appendChild(fragEnd);
   }
-  
-  // Listen for wheel events on the entire page
-  document.addEventListener('wheel', handleScroll, { passive: false });
-  
-  // Handle touch scrolling on mobile
-  var touchStartY = 0;
-  var touchStartScroll = 0;
-  
-  document.addEventListener('touchstart', function(e) {
-    touchStartY = e.touches[0].clientY;
-    touchStartScroll = scrollPosition;
-  });
-  
-  document.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    var touchY = e.touches[0].clientY;
-    var deltaY = touchStartY - touchY;
-    
-    scrollPosition = touchStartScroll + deltaY;
-    
-    // Handle infinite scroll
-    var maxScroll = imgHeight * totalImages;
-    
-    if (scrollPosition > maxScroll) {
-      scrollPosition = scrollPosition - maxScroll;
-    } else if (scrollPosition < 0) {
-      scrollPosition = maxScroll + scrollPosition;
+  duplicateImages();
+
+  // Set initial scroll position to the first original image set
+  function setInitialScroll() {
+    galleryScroll.scrollTop = imgHeight * imgs.length;
+  }
+  setInitialScroll();
+
+  // On scroll, if at start/end, reset to original set
+  galleryScroll.addEventListener('scroll', function() {
+    var scrollTop = galleryScroll.scrollTop;
+    var totalHeight = imgHeight * imgs.length;
+    if (scrollTop < imgHeight) {
+      // At or above first duplicate, jump to original
+      galleryScroll.scrollTop = scrollTop + totalHeight;
+    } else if (scrollTop > totalHeight * 2) {
+      // At or below last duplicate, jump to original
+      galleryScroll.scrollTop = scrollTop - totalHeight;
     }
-    
-    gallery.style.transform = 'translateY(-' + scrollPosition + 'px)';
-  }, { passive: false });
-  
-  // Initialize gallery position
-  gallery.style.transform = 'translateY(0px)';
+  });
+
+  // Responsive: update imgHeight on resize
+  window.addEventListener('resize', function() {
+    imgHeight = gallery.querySelector('.nitted-vert-img').offsetHeight;
+    setInitialScroll();
+  });
 })();
 
 // Countdown timer
