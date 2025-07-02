@@ -273,7 +273,7 @@
   </div>
 </div>
 <script>
-// Virtualized infinite vertical scroll gallery
+// Robust virtualized infinite vertical scroll gallery
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -286,62 +286,84 @@
   var imgHeight = 260; // fallback, will update after first render
   var buffer = 2; // Number of images above and below viewport to keep
 
-  // Helper to create an image element
+  function mod(n, m) {
+    return ((n % m) + m) % m;
+  }
+
   function createImg(idx) {
     var img = document.createElement('img');
-    img.src = imageSources[idx % imageSources.length];
-    img.alt = 'Nitted product photo ' + ((idx % imageSources.length) + 1);
+    var safeIdx = mod(idx, imageSources.length);
+    img.src = imageSources[safeIdx];
+    img.alt = 'Nitted product photo ' + (safeIdx + 1);
     img.className = 'nitted-vert-img';
     img.loading = 'lazy';
     img.dataset.idx = idx;
     return img;
   }
 
-  // State: which image index is at the top
   var topIdx = 0;
   var numImages = imageSources.length;
 
-  // Initial render: fill with enough images to cover viewport + buffer
   function initialRender() {
     gallery.innerHTML = '';
-    var n = Math.ceil(galleryScroll.offsetHeight / imgHeight) + 2 * buffer;
+    var nVisible = Math.ceil(galleryScroll.offsetHeight / imgHeight);
+    var n = nVisible + 2 * buffer;
     for (var i = 0; i < n; i++) {
       gallery.appendChild(createImg(topIdx + i));
     }
-    // Update imgHeight after first render
     var firstImg = gallery.querySelector('.nitted-vert-img');
     if (firstImg) imgHeight = firstImg.offsetHeight || imgHeight;
   }
   initialRender();
 
-  // On scroll, add/remove images as needed
   function onScroll() {
     var scrollTop = galleryScroll.scrollTop;
     var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-    if (imgs.length === 0) return;
+    if (imgs.length === 0) {
+      initialRender();
+      return;
+    }
     var firstImg = imgs[0];
     var lastImg = imgs[imgs.length - 1];
     var nVisible = Math.ceil(galleryScroll.offsetHeight / imgHeight);
+    var minImages = nVisible + 2 * buffer;
 
-    // If scrolled near bottom, append next image
-    if (lastImg.offsetTop < scrollTop + galleryScroll.offsetHeight + buffer * imgHeight) {
+    // Append next image if needed
+    while (lastImg.offsetTop < scrollTop + galleryScroll.offsetHeight + buffer * imgHeight) {
       var nextIdx = parseInt(lastImg.dataset.idx, 10) + 1;
       gallery.appendChild(createImg(nextIdx));
+      imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+      lastImg = imgs[imgs.length - 1];
     }
-    // If scrolled near top, prepend previous image
-    if (firstImg.offsetTop > scrollTop - buffer * imgHeight) {
+    // Prepend previous image if needed
+    while (firstImg.offsetTop > scrollTop - buffer * imgHeight) {
       var prevIdx = parseInt(firstImg.dataset.idx, 10) - 1;
       gallery.insertBefore(createImg(prevIdx), firstImg);
-      // Adjust scroll so content doesn't jump
       galleryScroll.scrollTop += imgHeight;
+      imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+      firstImg = imgs[0];
     }
-    // Remove images far below viewport
+    // Remove images far below viewport, but always keep at least minImages
     imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-    imgs.forEach(function(img) {
-      if (img.offsetTop + imgHeight < scrollTop - buffer * imgHeight || img.offsetTop > scrollTop + galleryScroll.offsetHeight + buffer * imgHeight) {
-        img.remove();
+    for (var i = imgs.length - 1; i >= 0; i--) {
+      if (
+        imgs.length > minImages &&
+        imgs[i].offsetTop + imgHeight < scrollTop - buffer * imgHeight
+      ) {
+        imgs[i].remove();
       }
-    });
+    }
+    // Remove images far above viewport, but always keep at least minImages
+    imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+    for (var i = 0; i < imgs.length; i++) {
+      if (
+        imgs.length > minImages &&
+        imgs[i].offsetTop > scrollTop + galleryScroll.offsetHeight + buffer * imgHeight
+      ) {
+        imgs[i].remove();
+        i--; // adjust index after removal
+      }
+    }
   }
 
   galleryScroll.addEventListener('scroll', onScroll);
