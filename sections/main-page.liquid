@@ -236,7 +236,7 @@
     align-items: center;
     background: var(--beige);
     min-height: 320px;
-    overflow: hidden;
+    overflow-y: hidden;
     position: relative;
     margin-bottom: 0;
   }
@@ -244,19 +244,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: transform 0.6s cubic-bezier(.4,1.6,.4,1);
-    will-change: transform;
+    height: 320px;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .nitted-vert-gallery::-webkit-scrollbar {
+    display: none;
   }
   .nitted-vert-img {
     width: 400px;
     height: 260px;
     object-fit: contain;
-    background: #f0e8de;
-    border-radius: 1.6rem;
-    box-shadow: 0 2px 24px 0 rgba(0,0,0,0.10);
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
     margin-bottom: 2.2rem;
     display: block;
-    transition: box-shadow 0.3s;
+    transition: none;
   }
   .nitted-vert-img:last-child {
     margin-bottom: 0;
@@ -264,6 +270,7 @@
   @media (max-width: 700px) {
     .nitted-vert-img { width: 240px; height: 120px; }
     .nitted-vert-gallery-container { min-height: 120px; }
+    .nitted-vert-gallery { height: 120px; }
   }
 </style>
 <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
@@ -291,50 +298,43 @@
     <div class="nitted-vert-gallery" id="nitted-vert-gallery">
       <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
       <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
+      <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
+      <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
     </div>
   </div>
 </div>
 <script>
-// Vertical gallery logic with swipe/scroll and looping
+// Continuous vertical scroll with infinite loop
 (function() {
   var gallery = document.getElementById('nitted-vert-gallery');
   var imgs = gallery.querySelectorAll('.nitted-vert-img');
-  var current = 0;
-  var total = imgs.length;
-  function updateGallery() {
-    gallery.style.transform = 'translateY(' + (-current * (imgs[0].offsetHeight + 22)) + 'px)';
+  var imgHeight = imgs[0].offsetHeight + 22; // 22px margin
+  var total = imgs.length / 2; // since we duplicate for looping
+  var scrollAmount = 0;
+  function loopScroll() {
+    if (gallery.scrollTop >= imgHeight * total) {
+      gallery.scrollTop = 0;
+    }
   }
-  function nextImage() {
-    current = (current + 1) % total;
-    updateGallery();
-  }
-  // Auto-scroll every 3 seconds
-  setInterval(nextImage, 3000);
-  // Touch/scroll support
-  var startY = null;
-  gallery.addEventListener('touchstart', function(e) {
-    startY = e.touches[0].clientY;
-  });
-  gallery.addEventListener('touchend', function(e) {
-    if (startY === null) return;
-    var endY = e.changedTouches[0].clientY;
-    if (startY - endY > 30) nextImage();
-    startY = null;
-  });
-  // Mouse wheel support
-  gallery.addEventListener('wheel', function(e) {
-    if (e.deltaY > 0) nextImage();
-  });
-  updateGallery();
+  // Auto-scroll
+  setInterval(function() {
+    gallery.scrollTop += imgHeight;
+    loopScroll();
+  }, 3000);
+  // User scroll: loop when reaching end
+  gallery.addEventListener('scroll', loopScroll);
 })();
 // Countdown timer
 (function() {
   var countdownEl = document.getElementById('nitted-countdown');
-  var target = new Date('2024-08-01T00:00:00Z');
+  var target = new Date('2024-08-01T00:00:00'); // local time
   function updateCountdown() {
     var now = new Date();
     var diff = target - now;
-    if (diff < 0) diff = 0;
+    if (diff <= 0) {
+      countdownEl.textContent = 'Drop is live!';
+      return;
+    }
     var days = Math.floor(diff / (1000*60*60*24));
     var hours = Math.floor((diff / (1000*60*60)) % 24);
     var mins = Math.floor((diff / (1000*60)) % 60);
