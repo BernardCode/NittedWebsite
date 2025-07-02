@@ -273,52 +273,81 @@
   </div>
 </div>
 <script>
-// Infinite vertical scroll gallery with smooth effect and seamless looping
+// Virtualized infinite vertical scroll gallery
 (function() {
+  var imageSources = [
+    "{{ 'product-photo1.png' | asset_url }}",
+    "{{ 'product-photo2.png' | asset_url }}",
+    "{{ 'product-photo1.png' | asset_url }}",
+    "{{ 'product-photo2.png' | asset_url }}"
+  ];
   var galleryScroll = document.getElementById('nitted-vert-gallery-scroll');
   var gallery = document.getElementById('nitted-vert-gallery');
-  var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-  var imgHeight = imgs[0].offsetHeight || 260; // fallback
-  var visibleHeight = imgHeight;
+  var imgHeight = 260; // fallback, will update after first render
+  var buffer = 2; // Number of images above and below viewport to keep
 
-  // Duplicate images for infinite effect
-  function duplicateImages() {
-    var fragStart = document.createDocumentFragment();
-    var fragEnd = document.createDocumentFragment();
-    imgs.forEach(function(img) {
-      fragEnd.appendChild(img.cloneNode(true));
-    });
-    imgs.forEach(function(img) {
-      fragStart.appendChild(img.cloneNode(true));
-    });
-    gallery.insertBefore(fragStart, gallery.firstChild);
-    gallery.appendChild(fragEnd);
+  // Helper to create an image element
+  function createImg(idx) {
+    var img = document.createElement('img');
+    img.src = imageSources[idx % imageSources.length];
+    img.alt = 'Nitted product photo ' + ((idx % imageSources.length) + 1);
+    img.className = 'nitted-vert-img';
+    img.loading = 'lazy';
+    img.dataset.idx = idx;
+    return img;
   }
-  duplicateImages();
 
-  // Set initial scroll position to the first original image set
-  function setInitialScroll() {
-    galleryScroll.scrollTop = imgHeight * imgs.length;
-  }
-  setInitialScroll();
+  // State: which image index is at the top
+  var topIdx = 0;
+  var numImages = imageSources.length;
 
-  // On scroll, if at start/end, reset to original set
-  galleryScroll.addEventListener('scroll', function() {
-    var scrollTop = galleryScroll.scrollTop;
-    var totalHeight = imgHeight * imgs.length;
-    if (scrollTop < imgHeight) {
-      // At or above first duplicate, jump to original
-      galleryScroll.scrollTop = scrollTop + totalHeight;
-    } else if (scrollTop > totalHeight * 2) {
-      // At or below last duplicate, jump to original
-      galleryScroll.scrollTop = scrollTop - totalHeight;
+  // Initial render: fill with enough images to cover viewport + buffer
+  function initialRender() {
+    gallery.innerHTML = '';
+    var n = Math.ceil(galleryScroll.offsetHeight / imgHeight) + 2 * buffer;
+    for (var i = 0; i < n; i++) {
+      gallery.appendChild(createImg(topIdx + i));
     }
-  });
+    // Update imgHeight after first render
+    var firstImg = gallery.querySelector('.nitted-vert-img');
+    if (firstImg) imgHeight = firstImg.offsetHeight || imgHeight;
+  }
+  initialRender();
 
-  // Responsive: update imgHeight on resize
+  // On scroll, add/remove images as needed
+  function onScroll() {
+    var scrollTop = galleryScroll.scrollTop;
+    var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+    if (imgs.length === 0) return;
+    var firstImg = imgs[0];
+    var lastImg = imgs[imgs.length - 1];
+    var nVisible = Math.ceil(galleryScroll.offsetHeight / imgHeight);
+
+    // If scrolled near bottom, append next image
+    if (lastImg.offsetTop < scrollTop + galleryScroll.offsetHeight + buffer * imgHeight) {
+      var nextIdx = parseInt(lastImg.dataset.idx, 10) + 1;
+      gallery.appendChild(createImg(nextIdx));
+    }
+    // If scrolled near top, prepend previous image
+    if (firstImg.offsetTop > scrollTop - buffer * imgHeight) {
+      var prevIdx = parseInt(firstImg.dataset.idx, 10) - 1;
+      gallery.insertBefore(createImg(prevIdx), firstImg);
+      // Adjust scroll so content doesn't jump
+      galleryScroll.scrollTop += imgHeight;
+    }
+    // Remove images far below viewport
+    imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+    imgs.forEach(function(img) {
+      if (img.offsetTop + imgHeight < scrollTop - buffer * imgHeight || img.offsetTop > scrollTop + galleryScroll.offsetHeight + buffer * imgHeight) {
+        img.remove();
+      }
+    });
+  }
+
+  galleryScroll.addEventListener('scroll', onScroll);
   window.addEventListener('resize', function() {
-    imgHeight = gallery.querySelector('.nitted-vert-img').offsetHeight;
-    setInitialScroll();
+    imgHeight = gallery.querySelector('.nitted-vert-img').offsetHeight || imgHeight;
+    initialRender();
   });
 })();
 
