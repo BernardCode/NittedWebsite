@@ -195,38 +195,38 @@
     margin-bottom: 1.5rem;
     letter-spacing: 0.04em;
   }
-  .nitted-vert-gallery-container {
+  .nitted-infinite-gallery-outer {
     width: 100vw;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--beige);
-    min-height: 320px;
-    overflow: visible;
-    position: relative;
-    margin-bottom: 0;
-  }
-  .nitted-vert-gallery {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: auto;
-    overflow: visible;
-    position: relative;
-  }
-  .nitted-vert-img {
-    width: 400px;
     height: 260px;
+    overflow: hidden;
+    position: relative;
+    touch-action: pan-x;
+    background: var(--beige);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nitted-infinite-gallery-inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    will-change: transform;
+    display: flex;
+    align-items: center;
+  }
+  .nitted-infinite-img {
+    height: 220px;
+    width: auto;
     object-fit: contain;
+    margin: 0 18px;
+    user-select: none;
+    pointer-events: none;
     background: none;
     border-radius: 0;
     box-shadow: none;
-    margin-bottom: 2.2rem;
     display: block;
     transition: none;
-  }
-  .nitted-vert-img:last-child {
-    margin-bottom: 0;
   }
   @media (max-width: 700px) {
     .nitted-logo-img { max-width: 80px; max-height: 40px; top: 1.2rem; }
@@ -234,9 +234,8 @@
     .nitted-hero-title { font-size: 1.4rem; }
     .nitted-email-form { max-width: 98vw; }
     .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
-    .nitted-vert-gallery-container { min-height: 120px; height: 120px; overflow: hidden; }
-    .nitted-vert-gallery-scroll { height: 120px !important; overflow-y: scroll; }
-    .nitted-vert-img { width: 100vw; max-width: 240px; height: 120px; margin-bottom: 0; }
+    .nitted-infinite-gallery-outer { height: 120px; }
+    .nitted-infinite-img { height: 100px; margin: 0 8px; }
   }
 </style>
 <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
@@ -260,20 +259,12 @@
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
   <div class="nitted-drop-text">Dropping August 1st</div>
   <div class="nitted-countdown" id="nitted-countdown"></div>
-  <div class="nitted-vert-gallery-container" style="height: 260px; max-width: 100vw; overflow: hidden; position: relative;">
-    <div class="nitted-vert-gallery-scroll" id="nitted-vert-gallery-scroll" style="height: 100%; overflow-y: scroll; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
-      <div class="nitted-vert-gallery" id="nitted-vert-gallery">
-        <!-- Images will be duplicated by JS for infinite effect -->
-        <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
-        <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
-        <img src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo 1" class="nitted-vert-img" loading="lazy">
-        <img src="{{ 'product-photo2.png' | asset_url }}" alt="Nitted product photo 2" class="nitted-vert-img" loading="lazy">
-      </div>
-    </div>
+  <div class="nitted-infinite-gallery-outer">
+    <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
   </div>
 </div>
 <script>
-// Truly infinite, non-cropped horizontal scroll gallery
+// Truly infinite, virtualized, drag-to-scroll horizontal gallery (no scrollbars, no limits)
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -281,22 +272,21 @@
     "{{ 'product-photo1.png' | asset_url }}",
     "{{ 'product-photo2.png' | asset_url }}"
   ];
-  var galleryScroll = document.getElementById('nitted-vert-gallery-scroll');
-  var gallery = document.getElementById('nitted-vert-gallery');
-  var imgHeight = 260; // fixed height for all images
-  var buffer = 2; // Number of images left/right of viewport to keep
+  var outer = document.querySelector('.nitted-infinite-gallery-outer');
+  var inner = document.getElementById('nitted-infinite-gallery-inner');
+  var imgHeight = window.innerWidth < 700 ? 100 : 220;
+  var imgMargin = window.innerWidth < 700 ? 8 : 18;
+  var buffer = 2; // images outside viewport
+  var imgCount = 0;
+  var imgWidth = 0;
+  var state = {
+    offset: 0, // virtual scroll offset in px
+    dragging: false,
+    dragStartX: 0,
+    dragStartOffset: 0,
+    leftMostIdx: 0 // index of leftmost image
+  };
 
-  // Set up horizontal flex
-  gallery.style.display = 'flex';
-  gallery.style.flexDirection = 'row';
-  gallery.style.alignItems = 'center';
-  galleryScroll.style.overflowX = 'scroll';
-  galleryScroll.style.overflowY = 'hidden';
-  galleryScroll.style.whiteSpace = 'nowrap';
-  galleryScroll.style.height = imgHeight + 'px';
-  galleryScroll.style.width = '100vw';
-
-  // Helper for modulo
   function mod(n, m) {
     return ((n % m) + m) % m;
   }
@@ -307,72 +297,102 @@
     var safeIdx = mod(idx, imageSources.length);
     img.src = imageSources[safeIdx];
     img.alt = 'Nitted product photo ' + (safeIdx + 1);
-    img.className = 'nitted-vert-img';
-    img.loading = 'lazy';
+    img.className = 'nitted-infinite-img';
+    img.draggable = false;
     img.dataset.idx = idx;
-    img.style.display = 'inline-block';
-    img.style.height = imgHeight + 'px';
-    img.style.width = 'auto';
-    img.style.objectFit = 'contain';
-    img.style.marginRight = '22px';
     return img;
   }
 
-  // State: index of leftmost image
-  var leftIdx = 0;
-
-  // Initial render: fill with enough images to cover viewport + buffer
-  function initialRender() {
-    gallery.innerHTML = '';
-    var n = Math.ceil(galleryScroll.offsetWidth / imgHeight) + 2 * buffer;
+  // Fill enough images to cover viewport + buffer
+  function fillImages() {
+    inner.innerHTML = '';
+    var vw = outer.offsetWidth;
+    var n = Math.ceil(vw / (imgHeight + 2 * imgMargin)) + 2 * buffer;
+    imgCount = n;
     for (var i = 0; i < n; i++) {
-      gallery.appendChild(createImg(leftIdx + i));
+      var img = createImg(state.leftMostIdx + i);
+      inner.appendChild(img);
     }
-    // Center scroll on the first image
-    galleryScroll.scrollLeft = 0;
-  }
-  initialRender();
-
-  // On scroll, add/remove images as needed
-  function onScroll() {
-    var scrollLeft = galleryScroll.scrollLeft;
-    var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-    if (imgs.length === 0) return;
-    var firstImg = imgs[0];
-    var lastImg = imgs[imgs.length - 1];
-    var nVisible = Math.ceil(galleryScroll.offsetWidth / imgHeight);
-    var minImages = nVisible + 2 * buffer;
-
-    // If scrolled near right, append next image and remove from left if too many
-    while (lastImg.getBoundingClientRect().right < galleryScroll.getBoundingClientRect().right + buffer * imgHeight) {
-      var nextIdx = parseInt(lastImg.dataset.idx, 10) + 1;
-      gallery.appendChild(createImg(nextIdx));
-      if (gallery.children.length > minImages + buffer) {
-        gallery.removeChild(gallery.firstChild);
-        leftIdx++;
-      }
-      imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-      lastImg = imgs[imgs.length - 1];
+    // After first render, measure width
+    var firstImg = inner.querySelector('.nitted-infinite-img');
+    if (firstImg) {
+      imgWidth = firstImg.offsetWidth || imgHeight;
+    } else {
+      imgWidth = imgHeight;
     }
-    // If scrolled near left, prepend previous image and remove from right if too many
-    while (firstImg.getBoundingClientRect().left > galleryScroll.getBoundingClientRect().left - buffer * imgHeight) {
-      var prevIdx = parseInt(firstImg.dataset.idx, 10) - 1;
-      var newImg = createImg(prevIdx);
-      gallery.insertBefore(newImg, firstImg);
-      // Adjust scroll so content doesn't jump
-      galleryScroll.scrollLeft += newImg.getBoundingClientRect().width + 22;
-      if (gallery.children.length > minImages + buffer) {
-        gallery.removeChild(gallery.lastChild);
-      }
-      imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-      firstImg = imgs[0];
-    }
+    updatePositions();
   }
 
-  galleryScroll.addEventListener('scroll', onScroll);
+  // Position images based on current offset
+  function updatePositions() {
+    inner.style.transform = 'translateX(' + state.offset + 'px)';
+  }
+
+  // Recycle images as needed
+  function recycleImages() {
+    var imgs = Array.from(inner.children);
+    var vw = outer.offsetWidth;
+    // Remove leftmost if it's far left
+    while (imgs.length && imgs[0].getBoundingClientRect().right < outer.getBoundingClientRect().left - imgWidth) {
+      inner.removeChild(imgs[0]);
+      state.leftMostIdx++;
+      // Add new rightmost
+      var newImg = createImg(state.leftMostIdx + imgs.length - 1);
+      inner.appendChild(newImg);
+      imgs = Array.from(inner.children);
+    }
+    // Remove rightmost if it's far right
+    while (imgs.length && imgs[imgs.length-1].getBoundingClientRect().left > outer.getBoundingClientRect().right + imgWidth) {
+      inner.removeChild(imgs[imgs.length-1]);
+      // Add new leftmost
+      state.leftMostIdx--;
+      var newImg = createImg(state.leftMostIdx);
+      inner.insertBefore(newImg, inner.firstChild);
+      // Adjust offset so content doesn't jump
+      state.offset -= (imgWidth + 2 * imgMargin);
+      updatePositions();
+      imgs = Array.from(inner.children);
+    }
+  }
+
+  // Drag logic
+  function onPointerDown(e) {
+    state.dragging = true;
+    state.dragStartX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    state.dragStartOffset = state.offset;
+    outer.style.cursor = 'grabbing';
+  }
+  function onPointerMove(e) {
+    if (!state.dragging) return;
+    var x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    var dx = x - state.dragStartX;
+    state.offset = state.dragStartOffset + dx;
+    updatePositions();
+    recycleImages();
+  }
+  function onPointerUp(e) {
+    state.dragging = false;
+    outer.style.cursor = '';
+  }
+
+  // Mouse events
+  outer.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+  // Touch events
+  outer.addEventListener('touchstart', onPointerDown, {passive:false});
+  window.addEventListener('touchmove', onPointerMove, {passive:false});
+  window.addEventListener('touchend', onPointerUp);
+
+  // Prevent image drag
+  outer.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+  // Responsive
   window.addEventListener('resize', function() {
-    initialRender();
+    fillImages();
   });
+
+  fillImages();
 })();
 
 // Countdown timer
