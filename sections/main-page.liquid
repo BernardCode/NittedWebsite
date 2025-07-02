@@ -273,7 +273,7 @@
   </div>
 </div>
 <script>
-// Truly infinite vertical scroll gallery
+// Virtualized infinite horizontal scroll gallery
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -283,78 +283,102 @@
   ];
   var galleryScroll = document.getElementById('nitted-vert-gallery-scroll');
   var gallery = document.getElementById('nitted-vert-gallery');
-  var imgHeight = 260; // fallback, will update after first render
-  var NUM_SLOTS = 1000; // Large number of slots for illusion
-  var MID_SLOT = Math.floor(NUM_SLOTS / 2);
+  var imgWidth = 400; // fallback, will update after first render
+  var buffer = 2; // Number of images left/right of viewport to keep
 
+  // Change flex direction to row for horizontal
+  gallery.style.display = 'flex';
+  gallery.style.flexDirection = 'row';
+  gallery.style.alignItems = 'center';
+
+  // Set scroll direction to horizontal
+  galleryScroll.style.overflowX = 'scroll';
+  galleryScroll.style.overflowY = 'hidden';
+  galleryScroll.style.whiteSpace = 'nowrap';
+  galleryScroll.style.height = '';
+  galleryScroll.style.width = '100vw';
+
+  // Helper for modulo
   function mod(n, m) {
     return ((n % m) + m) % m;
   }
 
-  // Create slots
-  function renderSlots() {
+  // Helper to create an image element
+  function createImg(idx) {
+    var img = document.createElement('img');
+    var safeIdx = mod(idx, imageSources.length);
+    img.src = imageSources[safeIdx];
+    img.alt = 'Nitted product photo ' + (safeIdx + 1);
+    img.className = 'nitted-vert-img';
+    img.loading = 'lazy';
+    img.dataset.idx = idx;
+    img.style.display = 'inline-block';
+    img.style.width = imgWidth + 'px';
+    img.style.height = 'auto';
+    img.style.marginRight = '22px';
+    return img;
+  }
+
+  // State: index of leftmost image
+  var leftIdx = 0;
+
+  // Initial render: fill with enough images to cover viewport + buffer
+  function initialRender() {
     gallery.innerHTML = '';
-    for (var i = 0; i < NUM_SLOTS; i++) {
-      var img = document.createElement('img');
-      img.className = 'nitted-vert-img';
-      img.loading = 'lazy';
-      img.dataset.slot = i;
-      gallery.appendChild(img);
+    var n = Math.ceil(galleryScroll.offsetWidth / imgWidth) + 2 * buffer;
+    for (var i = 0; i < n; i++) {
+      gallery.appendChild(createImg(leftIdx + i));
     }
-  }
-  renderSlots();
-
-  // Set images in visible slots
-  function updateVisibleImages() {
-    var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
-    var scrollTop = galleryScroll.scrollTop;
-    var nVisible = Math.ceil(galleryScroll.offsetHeight / imgHeight) + 2;
-    var firstVisible = Math.floor(scrollTop / imgHeight);
-    for (var i = firstVisible - 2; i < firstVisible + nVisible; i++) {
-      if (i < 0 || i >= NUM_SLOTS) continue;
-      var img = imgs[i];
-      var idx = mod(i, imageSources.length);
-      img.src = imageSources[idx];
-      img.alt = 'Nitted product photo ' + (idx + 1);
-    }
-  }
-
-  // Set initial height and scroll position
-  function setInitial() {
     var firstImg = gallery.querySelector('.nitted-vert-img');
-    if (firstImg) imgHeight = firstImg.offsetHeight || imgHeight;
-    gallery.style.height = (NUM_SLOTS * imgHeight) + 'px';
-    galleryScroll.scrollTop = MID_SLOT * imgHeight;
-    updateVisibleImages();
+    if (firstImg) imgWidth = firstImg.offsetWidth || imgWidth;
+    // Center scroll on the first image
+    galleryScroll.scrollLeft = 0;
   }
+  initialRender();
 
-  // On scroll, update images and reset position if near ends
+  // On scroll, add/remove images as needed
   function onScroll() {
-    var scrollTop = galleryScroll.scrollTop;
-    var maxScroll = (NUM_SLOTS - 1) * imgHeight;
-    var threshold = 10 * imgHeight;
-    updateVisibleImages();
-    // If near top, reset to middle
-    if (scrollTop < threshold) {
-      galleryScroll.scrollTop = (MID_SLOT + (scrollTop / imgHeight) % imageSources.length) * imgHeight;
-      updateVisibleImages();
+    var scrollLeft = galleryScroll.scrollLeft;
+    var imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+    if (imgs.length === 0) return;
+    var firstImg = imgs[0];
+    var lastImg = imgs[imgs.length - 1];
+    var nVisible = Math.ceil(galleryScroll.offsetWidth / imgWidth);
+    var minImages = nVisible + 2 * buffer;
+
+    // If scrolled near right, append next image and remove from left
+    while (lastImg.offsetLeft < scrollLeft + galleryScroll.offsetWidth + buffer * imgWidth) {
+      var nextIdx = parseInt(lastImg.dataset.idx, 10) + 1;
+      gallery.appendChild(createImg(nextIdx));
+      // Remove from left if too many
+      if (gallery.children.length > minImages) {
+        gallery.removeChild(gallery.firstChild);
+        leftIdx++;
+      }
+      imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+      lastImg = imgs[imgs.length - 1];
     }
-    // If near bottom, reset to middle
-    else if (scrollTop > maxScroll - threshold) {
-      galleryScroll.scrollTop = (MID_SLOT - (maxScroll - scrollTop) / imgHeight % imageSources.length) * imgHeight;
-      updateVisibleImages();
+    // If scrolled near left, prepend previous image and remove from right
+    while (firstImg.offsetLeft > scrollLeft - buffer * imgWidth) {
+      var prevIdx = parseInt(firstImg.dataset.idx, 10) - 1;
+      gallery.insertBefore(createImg(prevIdx), firstImg);
+      // Adjust scroll so content doesn't jump
+      galleryScroll.scrollLeft += imgWidth + 22;
+      // Remove from right if too many
+      if (gallery.children.length > minImages) {
+        gallery.removeChild(gallery.lastChild);
+      }
+      imgs = Array.from(gallery.querySelectorAll('.nitted-vert-img'));
+      firstImg = imgs[0];
     }
   }
 
   galleryScroll.addEventListener('scroll', onScroll);
   window.addEventListener('resize', function() {
     var firstImg = gallery.querySelector('.nitted-vert-img');
-    if (firstImg) imgHeight = firstImg.offsetHeight || imgHeight;
-    setInitial();
+    if (firstImg) imgWidth = firstImg.offsetWidth || imgWidth;
+    initialRender();
   });
-  // Initial setup after images load
-  window.addEventListener('load', setInitial);
-  setTimeout(setInitial, 100); // Fallback for late image load
 })();
 
 // Countdown timer
