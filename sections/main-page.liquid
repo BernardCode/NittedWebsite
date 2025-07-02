@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Optimized, infinite, virtualized, drag-to-scroll horizontal gallery with autoscroll, max speed, and center scaling
+// Glitch-free, infinite, virtualized, drag-to-scroll horizontal gallery with autoscroll, max speed, and center scaling
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -278,10 +278,10 @@
   var imgMargin = window.innerWidth < 700 ? 8 : 18;
   var buffer = 1;
   var imgWidth = imgHeight;
-  var MAX_VELOCITY = 3; // px per frame
+  var MAX_VELOCITY = 3;
   var MIN_SCALE = 0.8;
   var MAX_SCALE = 1.3;
-  var SCALE_DISTANCE = 0.5; // fraction of half-viewport for max scaling
+  var SCALE_DISTANCE = 0.5;
   var state = {
     offset: 0,
     dragging: false,
@@ -309,6 +309,10 @@
     img.draggable = false;
     img.dataset.idx = idx;
     img.style.transition = 'transform 0.25s cubic-bezier(.4,0,.2,1)';
+    img.style.position = 'absolute';
+    img.style.left = '0';
+    img.style.top = '50%';
+    img.style.transform = 'translateY(-50%)';
     return img;
   }
 
@@ -327,38 +331,35 @@
       imgWidth = imgHeight;
     }
     state.offset = 0;
-    updatePositions();
-    scaleImages();
+    updatePositionsAndScale();
   }
 
-  function updatePositions() {
-    inner.style.transform = 'translateX(' + state.offset + 'px)';
-  }
-
-  // Smoothly scale images based on distance from center
-  function scaleImages() {
+  function updatePositionsAndScale() {
     var imgs = Array.from(inner.children);
-    var outerRect = outer.getBoundingClientRect();
-    var centerX = outerRect.left + outerRect.width / 2;
+    var vw = outer.offsetWidth;
     var totalImgWidth = imgWidth + 2 * imgMargin;
+    var centerX = vw / 2;
     imgs.forEach(function(img, i) {
-      var imgRect = img.getBoundingClientRect();
-      var imgCenter = imgRect.left + imgRect.width / 2;
-      var dist = Math.abs(imgCenter - centerX);
-      var norm = dist / (outerRect.width * SCALE_DISTANCE / 2); // 0 at center, 1 at edge
+      var idx = parseInt(img.dataset.idx, 10);
+      var pos = (idx - state.leftMostIdx) * totalImgWidth + state.offset;
+      img.style.left = (pos + centerX - imgWidth / 2) + 'px';
+      // Scaling
+      var dist = Math.abs(pos + imgWidth / 2);
+      var norm = dist / (vw * SCALE_DISTANCE / 2);
       norm = Math.min(norm, 1);
-      var scale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * (1 - norm * norm); // smoothstep
-      img.style.transform = 'scale(' + scale + ')';
+      var scale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * (1 - norm * norm);
+      img.style.transform = 'translateY(-50%) scale(' + scale + ')';
       img.style.zIndex = Math.round(scale * 100);
     });
   }
 
   function recycleIfNeeded() {
+    if (state.dragging) return; // Only recycle when not dragging
     var imgs = Array.from(inner.children);
     var totalImgWidth = imgWidth + 2 * imgMargin;
+    var vw = outer.offsetWidth;
     // Clamp offset to prevent floating point drift
     if (Math.abs(state.offset) > 10000) {
-      // Reset offset and indices
       var imgsOnScreen = imgs.length;
       state.offset = 0;
       state.leftMostIdx = 0;
@@ -369,35 +370,31 @@
       imgs = Array.from(inner.children);
     }
     // Recycle right
-    while (state.offset <= -totalImgWidth) {
+    while ((state.leftMostIdx + imgs.length - 1) * totalImgWidth + state.offset < -vw / 2) {
       inner.removeChild(inner.firstChild);
       var newIdx = parseInt(imgs[imgs.length - 1].dataset.idx, 10) + 1;
       inner.appendChild(createImg(newIdx));
       state.leftMostIdx++;
-      state.offset += totalImgWidth;
       imgs = Array.from(inner.children);
     }
     // Recycle left
-    while (state.offset >= totalImgWidth) {
+    while (state.leftMostIdx * totalImgWidth + state.offset > vw / 2) {
       inner.removeChild(inner.lastChild);
       var newIdx = parseInt(imgs[0].dataset.idx, 10) - 1;
       inner.insertBefore(createImg(newIdx), inner.firstChild);
       state.leftMostIdx--;
-      state.offset -= totalImgWidth;
       imgs = Array.from(inner.children);
     }
   }
 
   function rafUpdate() {
-    // Clamp velocity
     if (state.velocity > MAX_VELOCITY) state.velocity = MAX_VELOCITY;
     if (state.velocity < -MAX_VELOCITY) state.velocity = -MAX_VELOCITY;
     if (!state.dragging) {
       state.offset -= state.velocity;
     }
-    updatePositions();
+    updatePositionsAndScale();
     recycleIfNeeded();
-    scaleImages();
     state.rafId = requestAnimationFrame(rafUpdate);
   }
 
@@ -423,9 +420,7 @@
     }
     state.lastX = x;
     state.lastMoveTime = now;
-    updatePositions();
-    recycleIfNeeded();
-    scaleImages();
+    updatePositionsAndScale();
   }
   function onPointerUp(e) {
     state.dragging = false;
