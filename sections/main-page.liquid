@@ -217,7 +217,20 @@
 <div class="nitted-content">
   <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
   <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
-  {% section 'newsletter' %}
+  <form method="post" action="/contact#ContactFooter" id="ContactFooter" class="nitted-email-form" accept-charset="UTF-8" autocomplete="off">
+    <input type="hidden" name="form_type" value="customer" />
+    <input type="hidden" name="utf8" value="✓" />
+    <input type="email" id="NewsletterForm--main" name="contact[email]" class="nitted-email-input" autocorrect="off" autocapitalize="off" autocomplete="email" placeholder="Enter your email" required>
+    <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
+    {% if form.posted_successfully? %}
+      <div class="nitted-newsletter-success" style="color:#1a4d1a; font-size:1.1rem; margin-top:1.2rem; text-align:center;">Thank you for joining the waitlist! You're on the list for first access and exclusive offers.</div>
+    {% endif %}
+    {% if form.errors %}
+      <div class="nitted-newsletter-error" style="color:#b00; font-size:1rem; margin-top:0.5rem; text-align:center;">
+        {{ form.errors | default_errors }}
+      </div>
+    {% endif %}
+  </form>
   <div class="nitted-gallery-container">
     <img id="nitted-gallery-img" src="{{ 'product-photo1.png' | asset_url }}" alt="Nitted product photo" class="nitted-gallery-img" loading="lazy">
   </div>
