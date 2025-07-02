@@ -264,7 +264,7 @@
   </div>
 </div>
 <script>
-// Optimized, truly infinite, virtualized, drag-to-scroll horizontal gallery with slow autoscroll
+// Optimized, infinite, virtualized, drag-to-scroll horizontal gallery with autoscroll, max speed, and center scaling
 (function() {
   var imageSources = [
     "{{ 'product-photo1.png' | asset_url }}",
@@ -278,6 +278,10 @@
   var imgMargin = window.innerWidth < 700 ? 8 : 18;
   var buffer = 1;
   var imgWidth = imgHeight;
+  var MAX_VELOCITY = 3; // px per frame
+  var MIN_SCALE = 0.8;
+  var MAX_SCALE = 1.3;
+  var SCALE_DISTANCE = 0.5; // fraction of half-viewport for max scaling
   var state = {
     offset: 0,
     dragging: false,
@@ -285,7 +289,7 @@
     dragStartOffset: 0,
     leftMostIdx: 0,
     rafId: null,
-    velocity: 0.15, // px per frame (autoscroll speed)
+    velocity: 0.15,
     lastX: 0,
     lastMoveTime: 0,
     userVelocity: 0,
@@ -304,6 +308,7 @@
     img.className = 'nitted-infinite-img';
     img.draggable = false;
     img.dataset.idx = idx;
+    img.style.transition = 'transform 0.25s cubic-bezier(.4,0,.2,1)';
     return img;
   }
 
@@ -323,15 +328,47 @@
     }
     state.offset = 0;
     updatePositions();
+    scaleImages();
   }
 
   function updatePositions() {
     inner.style.transform = 'translateX(' + state.offset + 'px)';
   }
 
+  // Smoothly scale images based on distance from center
+  function scaleImages() {
+    var imgs = Array.from(inner.children);
+    var outerRect = outer.getBoundingClientRect();
+    var centerX = outerRect.left + outerRect.width / 2;
+    var totalImgWidth = imgWidth + 2 * imgMargin;
+    imgs.forEach(function(img, i) {
+      var imgRect = img.getBoundingClientRect();
+      var imgCenter = imgRect.left + imgRect.width / 2;
+      var dist = Math.abs(imgCenter - centerX);
+      var norm = dist / (outerRect.width * SCALE_DISTANCE / 2); // 0 at center, 1 at edge
+      norm = Math.min(norm, 1);
+      var scale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * (1 - norm * norm); // smoothstep
+      img.style.transform = 'scale(' + scale + ')';
+      img.style.zIndex = Math.round(scale * 100);
+    });
+  }
+
   function recycleIfNeeded() {
     var imgs = Array.from(inner.children);
     var totalImgWidth = imgWidth + 2 * imgMargin;
+    // Clamp offset to prevent floating point drift
+    if (Math.abs(state.offset) > 10000) {
+      // Reset offset and indices
+      var imgsOnScreen = imgs.length;
+      state.offset = 0;
+      state.leftMostIdx = 0;
+      inner.innerHTML = '';
+      for (var i = 0; i < imgsOnScreen; i++) {
+        inner.appendChild(createImg(state.leftMostIdx + i));
+      }
+      imgs = Array.from(inner.children);
+    }
+    // Recycle right
     while (state.offset <= -totalImgWidth) {
       inner.removeChild(inner.firstChild);
       var newIdx = parseInt(imgs[imgs.length - 1].dataset.idx, 10) + 1;
@@ -340,6 +377,7 @@
       state.offset += totalImgWidth;
       imgs = Array.from(inner.children);
     }
+    // Recycle left
     while (state.offset >= totalImgWidth) {
       inner.removeChild(inner.lastChild);
       var newIdx = parseInt(imgs[0].dataset.idx, 10) - 1;
@@ -350,17 +388,19 @@
     }
   }
 
-  // Animation frame update with autoscroll
   function rafUpdate() {
+    // Clamp velocity
+    if (state.velocity > MAX_VELOCITY) state.velocity = MAX_VELOCITY;
+    if (state.velocity < -MAX_VELOCITY) state.velocity = -MAX_VELOCITY;
     if (!state.dragging) {
       state.offset -= state.velocity;
     }
     updatePositions();
     recycleIfNeeded();
+    scaleImages();
     state.rafId = requestAnimationFrame(rafUpdate);
   }
 
-  // Drag logic
   function onPointerDown(e) {
     state.dragging = true;
     state.dragStartX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
@@ -376,53 +416,44 @@
     var x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
     var dx = x - state.dragStartX;
     state.offset = state.dragStartOffset + dx;
-    // Calculate user velocity
     var now = Date.now();
     var dt = now - state.lastMoveTime;
     if (dt > 0) {
-      state.userVelocity = (x - state.lastX) / dt * 16; // px per frame
+      state.userVelocity = (x - state.lastX) / dt * 16;
     }
     state.lastX = x;
     state.lastMoveTime = now;
     updatePositions();
     recycleIfNeeded();
+    scaleImages();
   }
   function onPointerUp(e) {
     state.dragging = false;
     outer.style.cursor = '';
-    // Ease velocity back to autoscroll
     state.easing = true;
     easeToAutoscroll();
   }
 
-  // Ease velocity back to autoscroll after drag
   function easeToAutoscroll() {
     if (!state.easing) return;
-    // Gradually reduce userVelocity to 0, then set velocity to autoscroll
     if (Math.abs(state.userVelocity) > 0.2) {
-      state.velocity = state.userVelocity * 0.95 + 0.15 * 0.05; // blend toward autoscroll
+      state.velocity = state.userVelocity * 0.95 + 0.15 * 0.05;
       state.userVelocity *= 0.95;
       requestAnimationFrame(easeToAutoscroll);
     } else {
-      state.velocity = 0.15; // autoscroll speed
+      state.velocity = 0.15;
       state.userVelocity = 0;
       state.easing = false;
     }
   }
 
-  // Mouse events
   outer.addEventListener('mousedown', onPointerDown);
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('mouseup', onPointerUp);
-  // Touch events
   outer.addEventListener('touchstart', onPointerDown, {passive:false});
   window.addEventListener('touchmove', onPointerMove, {passive:false});
   window.addEventListener('touchend', onPointerUp);
-
-  // Prevent image drag
   outer.addEventListener('dragstart', function(e) { e.preventDefault(); });
-
-  // Responsive
   window.addEventListener('resize', function() {
     fillImages();
   });
