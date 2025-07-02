@@ -422,25 +422,26 @@
   var countdownEl = document.getElementById('nitted-countdown');
   // Target: August 1st, 2024, 12:00am PST (UTC-7)
   function getTargetDate() {
-    // Create a date in UTC for August 1st, 2024, 07:00 UTC (which is 12am PST)
+    // August 1st, 2024, 12:00am PST is 2024-08-01T07:00:00.000Z in UTC
     return new Date(Date.UTC(2024, 7, 1, 7, 0, 0, 0));
   }
   var target = getTargetDate();
 
   function updateCountdown() {
     var now = new Date();
-    // Get user's current time in UTC
-    var nowUTC = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    var diff = target - nowUTC;
+    // Convert user's time to UTC-7 (PST)
+    var nowUtc = now.getTime() + now.getTimezoneOffset() * 60000;
+    // Offset for PST (UTC-7): -7 hours in ms
+    var nowPst = new Date(nowUtc - (7 * 60 * 60000));
+    var diff = target - nowPst;
     if (diff <= 0) {
       countdownEl.textContent = 'Drop is live!';
       return;
     }
     var days = Math.floor(diff / (1000*60*60*24));
     var hours = Math.floor((diff / (1000*60*60)) % 24);
-    var mins = Math.floor((diff / (1000*60)) % 60);
     var secs = Math.floor((diff / 1000) % 60);
-    countdownEl.textContent = days + 'd ' + hours + 'h ' + mins + 'm ' + secs + 's';
+    countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
