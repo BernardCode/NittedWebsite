@@ -417,15 +417,36 @@
   rafUpdate();
 })();
 
-// Countdown timer to August 1st, 12am PST (UTC-7) using UTC only
+// Countdown timer to August 1st, 12am PST (UTC-7) using WorldTimeAPI for accurate UTC
 (function() {
   var countdownEl = document.getElementById('nitted-countdown');
-  // Target: August 1st, 2024, 07:00:00 UTC (which is 12am PST)
-  var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0);
+  var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0); // August 1st, 2024, 07:00:00 UTC
+  var currentUTC = null; // in ms
+  var lastSync = 0;
+
+  function fetchUTC(cb) {
+    fetch('https://worldtimeapi.org/api/timezone/Etc/UTC')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        // unixtime is in seconds, convert to ms
+        currentUTC = data.unixtime * 1000;
+        lastSync = Date.now();
+        if (cb) cb();
+      })
+      .catch(function() {
+        // fallback to local time if API fails
+        currentUTC = Date.now();
+        lastSync = Date.now();
+        if (cb) cb();
+      });
+  }
 
   function updateCountdown() {
-    var nowUTC = Date.now();
-    var diff = targetUTC - nowUTC;
+    if (currentUTC === null) return;
+    // Advance currentUTC by the time since lastSync
+    var now = Date.now();
+    var utcNow = currentUTC + (now - lastSync);
+    var diff = targetUTC - utcNow;
     if (diff <= 0) {
       countdownEl.textContent = 'Drop is live!';
       return;
@@ -435,8 +456,14 @@
     var secs = Math.floor((diff / 1000) % 60);
     countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
   }
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+
+  // Initial fetch
+  fetchUTC(function() {
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    // Re-sync with API every minute
+    setInterval(function() { fetchUTC(); }, 60000);
+  });
 })();
 </script>
 
