@@ -417,17 +417,18 @@
   rafUpdate();
 })();
 
-// Countdown timer to August 1st, 12am PDT (UTC-7) using WorldTimeAPI for accurate UTC, fetch every second
+// Countdown timer to August 1st, 12am PDT (UTC-7) using timeapi.io for accurate UTC, fetch every second
 (function() {
   var countdownEl = document.getElementById('nitted-countdown');
   // August 1st, 2024, 12:00am PDT (UTC-7) is 2024-08-01T07:00:00.000Z
   var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0);
 
   function updateCountdownFromAPI() {
-    fetch('https://worldtimeapi.org/api/timezone/Etc/UTC')
+    fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC')
       .then(function(res) { return res.json(); })
       .then(function(data) {
-        var currentUTC = data.unixtime * 1000;
+        // data.dateTime is like '2024-07-06T18:05:00'
+        var currentUTC = Date.parse(data.dateTime + 'Z');
         var diff = targetUTC - currentUTC;
         if (window && window.console) {
           console.log('[Nitted Countdown] Target UTC:', new Date(targetUTC).toISOString(), 'Current UTC:', new Date(currentUTC).toISOString(), 'Diff ms:', diff);
