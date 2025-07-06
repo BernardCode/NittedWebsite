@@ -417,10 +417,10 @@
   rafUpdate();
 })();
 
-// Local countdown timer to August 1st, 12:00am local time
+// Local countdown timer to August 1st, 2025, 12:00am local time
 (function() {
-  // Set the target date to August 1st of the current year
-  const targetDate = new Date(new Date().getFullYear(), 7 - 1, 1, 0, 0, 0); // month is 0-indexed
+  // Set the target date to August 1st, 2025, 12:00am local time
+  const targetDate = new Date(2025, 7 - 1, 1, 0, 0, 0); // month is 0-indexed
 
   function updateCountdown() {
     const now = new Date();
