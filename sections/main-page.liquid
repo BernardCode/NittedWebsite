@@ -417,20 +417,12 @@
   rafUpdate();
 })();
 
-// Local countdown timer to the next August 1st, 12:00am local time
+// Local countdown timer to August 1st, 2025, 12:00am local time
 (function() {
-  function getNextAugustFirst() {
-    const now = new Date();
-    let year = now.getFullYear();
-    const augustFirst = new Date(year, 7 - 1, 1, 0, 0, 0);
-    if (now >= augustFirst) {
-      year += 1;
-    }
-    return new Date(year, 7 - 1, 1, 0, 0, 0);
-  }
+  // Set the target date to August 1st, 2025, 12:00am local time
+  const targetDate = new Date(2025, 7 - 1, 1, 0, 0, 0); // month is 0-indexed
 
   function updateCountdown() {
-    const targetDate = getNextAugustFirst();
     const now = new Date();
     const diff = targetDate - now;
 
