@@ -417,53 +417,37 @@
   rafUpdate();
 })();
 
-// Countdown timer to August 1st, 12am PDT (UTC-7) using WorldTimeAPI for accurate UTC
+// Countdown timer to August 1st, 12am PDT (UTC-7) using WorldTimeAPI for accurate UTC, fetch every second
 (function() {
   var countdownEl = document.getElementById('nitted-countdown');
   // August 1st, 2024, 12:00am PDT (UTC-7) is 2024-08-01T07:00:00.000Z
   var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0);
-  var currentUTC = null; // in ms
-  var lastSync = 0;
 
-  function fetchUTC(cb) {
+  function updateCountdownFromAPI() {
     fetch('https://worldtimeapi.org/api/timezone/Etc/UTC')
       .then(function(res) { return res.json(); })
       .then(function(data) {
-        currentUTC = data.unixtime * 1000;
-        lastSync = Date.now();
-        if (cb) cb();
+        var currentUTC = data.unixtime * 1000;
+        var diff = targetUTC - currentUTC;
+        if (window && window.console) {
+          console.log('[Nitted Countdown] Target UTC:', new Date(targetUTC).toISOString(), 'Current UTC:', new Date(currentUTC).toISOString(), 'Diff ms:', diff);
+        }
+        if (diff > 0) {
+          var days = Math.floor(diff / (1000*60*60*24));
+          var hours = Math.floor((diff / (1000*60*60)) % 24);
+          var secs = Math.floor((diff / 1000) % 60);
+          countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
+        } else {
+          countdownEl.textContent = 'Drop is live!';
+        }
       })
       .catch(function() {
-        currentUTC = Date.now();
-        lastSync = Date.now();
-        if (cb) cb();
+        countdownEl.textContent = 'Unable to fetch time.';
       });
   }
 
-  function updateCountdown() {
-    if (currentUTC === null) return;
-    var now = Date.now();
-    var utcNow = currentUTC + (now - lastSync);
-    var diff = targetUTC - utcNow;
-    // Debug log
-    if (window && window.console) {
-      console.log('[Nitted Countdown] Target UTC:', new Date(targetUTC).toISOString(), 'Current UTC:', new Date(utcNow).toISOString(), 'Diff ms:', diff);
-    }
-    if (diff > 0) {
-      var days = Math.floor(diff / (1000*60*60*24));
-      var hours = Math.floor((diff / (1000*60*60)) % 24);
-      var secs = Math.floor((diff / 1000) % 60);
-      countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
-    } else {
-      countdownEl.textContent = 'Drop is live!';
-    }
-  }
-
-  fetchUTC(function() {
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-    setInterval(function() { fetchUTC(); }, 60000);
-  });
+  updateCountdownFromAPI();
+  setInterval(updateCountdownFromAPI, 1000);
 })();
 </script>
 
