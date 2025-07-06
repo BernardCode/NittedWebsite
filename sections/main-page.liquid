@@ -417,68 +417,31 @@
   rafUpdate();
 })();
 
-// Robust countdown timer to August 1st, 12am PDT (UTC-7) using timeapi.io for accurate UTC
+// Local countdown timer to August 1st, 12:00am local time
 (function() {
-  var countdownEl = document.getElementById('nitted-countdown');
-  var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0); // August 1st, 2024, 07:00:00 UTC
-  var lastApiUTC = null; // ms
-  var lastApiLocal = null; // ms
-  var apiFailed = false;
-
-  function showCountdown(diff) {
-    if (diff > 0) {
-      var days = Math.floor(diff / (1000*60*60*24));
-      var hours = Math.floor((diff / (1000*60*60)) % 24);
-      var secs = Math.floor((diff / 1000) % 60);
-      countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
-    } else {
-      countdownEl.textContent = 'Drop is live!';
-    }
-  }
-
-  function fetchAndStartCountdown() {
-    countdownEl.textContent = 'Loading...';
-    fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC')
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        lastApiUTC = Date.parse(data.dateTime + 'Z');
-        lastApiLocal = Date.now();
-        apiFailed = false;
-        updateCountdown();
-        // Start local ticking
-        setInterval(updateCountdown, 1000);
-        // Re-sync with API every 10 seconds
-        setInterval(fetchUTCResync, 10000);
-      })
-      .catch(function() {
-        apiFailed = true;
-        countdownEl.textContent = 'Unable to fetch time. Please refresh.';
-      });
-  }
-
-  function fetchUTCResync() {
-    fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC')
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        lastApiUTC = Date.parse(data.dateTime + 'Z');
-        lastApiLocal = Date.now();
-        apiFailed = false;
-      })
-      .catch(function() {
-        apiFailed = true;
-        countdownEl.textContent = 'Unable to fetch time. Please refresh.';
-      });
-  }
+  // Set the target date to August 1st of the current year
+  const targetDate = new Date(new Date().getFullYear(), 7 - 1, 1, 0, 0, 0); // month is 0-indexed
 
   function updateCountdown() {
-    if (apiFailed || lastApiUTC === null || lastApiLocal === null) return;
-    var now = Date.now();
-    var currentUTC = lastApiUTC + (now - lastApiLocal);
-    var diff = targetUTC - currentUTC;
-    showCountdown(diff);
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+      document.getElementById('nitted-countdown').innerHTML = "Countdown finished!";
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    document.getElementById('nitted-countdown').innerHTML =
+      `${days}d ${hours}h ${minutes}m ${seconds}s`;
   }
 
-  fetchAndStartCountdown();
+  updateCountdown(); // initial call
+  setInterval(updateCountdown, 1000); // update every second
 })();
 </script>
 
