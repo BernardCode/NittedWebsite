@@ -417,38 +417,68 @@
   rafUpdate();
 })();
 
-// Countdown timer to August 1st, 12am PDT (UTC-7) using timeapi.io for accurate UTC, fetch every second
+// Robust countdown timer to August 1st, 12am PDT (UTC-7) using timeapi.io for accurate UTC
 (function() {
   var countdownEl = document.getElementById('nitted-countdown');
-  // August 1st, 2024, 12:00am PDT (UTC-7) is 2024-08-01T07:00:00.000Z
-  var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0);
+  var targetUTC = Date.UTC(2024, 7, 1, 7, 0, 0, 0); // August 1st, 2024, 07:00:00 UTC
+  var lastApiUTC = null; // ms
+  var lastApiLocal = null; // ms
+  var apiFailed = false;
 
-  function updateCountdownFromAPI() {
+  function showCountdown(diff) {
+    if (diff > 0) {
+      var days = Math.floor(diff / (1000*60*60*24));
+      var hours = Math.floor((diff / (1000*60*60)) % 24);
+      var secs = Math.floor((diff / 1000) % 60);
+      countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
+    } else {
+      countdownEl.textContent = 'Drop is live!';
+    }
+  }
+
+  function fetchAndStartCountdown() {
+    countdownEl.textContent = 'Loading...';
     fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC')
       .then(function(res) { return res.json(); })
       .then(function(data) {
-        // data.dateTime is like '2024-07-06T18:05:00'
-        var currentUTC = Date.parse(data.dateTime + 'Z');
-        var diff = targetUTC - currentUTC;
-        if (window && window.console) {
-          console.log('[Nitted Countdown] Target UTC:', new Date(targetUTC).toISOString(), 'Current UTC:', new Date(currentUTC).toISOString(), 'Diff ms:', diff);
-        }
-        if (diff > 0) {
-          var days = Math.floor(diff / (1000*60*60*24));
-          var hours = Math.floor((diff / (1000*60*60)) % 24);
-          var secs = Math.floor((diff / 1000) % 60);
-          countdownEl.textContent = days + 'd ' + hours + 'h ' + secs + 's';
-        } else {
-          countdownEl.textContent = 'Drop is live!';
-        }
+        lastApiUTC = Date.parse(data.dateTime + 'Z');
+        lastApiLocal = Date.now();
+        apiFailed = false;
+        updateCountdown();
+        // Start local ticking
+        setInterval(updateCountdown, 1000);
+        // Re-sync with API every 10 seconds
+        setInterval(fetchUTCResync, 10000);
       })
       .catch(function() {
-        countdownEl.textContent = 'Unable to fetch time.';
+        apiFailed = true;
+        countdownEl.textContent = 'Unable to fetch time. Please refresh.';
       });
   }
 
-  updateCountdownFromAPI();
-  setInterval(updateCountdownFromAPI, 1000);
+  function fetchUTCResync() {
+    fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        lastApiUTC = Date.parse(data.dateTime + 'Z');
+        lastApiLocal = Date.now();
+        apiFailed = false;
+      })
+      .catch(function() {
+        apiFailed = true;
+        countdownEl.textContent = 'Unable to fetch time. Please refresh.';
+      });
+  }
+
+  function updateCountdown() {
+    if (apiFailed || lastApiUTC === null || lastApiLocal === null) return;
+    var now = Date.now();
+    var currentUTC = lastApiUTC + (now - lastApiLocal);
+    var diff = targetUTC - currentUTC;
+    showCountdown(diff);
+  }
+
+  fetchAndStartCountdown();
 })();
 </script>
 
