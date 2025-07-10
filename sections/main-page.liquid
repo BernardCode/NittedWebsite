@@ -187,6 +187,10 @@
     text-align: center;
     letter-spacing: 0.02em;
   }
+  .nitted-drop-text-large {
+    font-size: 3rem; /* Make it much larger */
+    margin-bottom: 0.5rem; /* Adjust spacing */
+  }
   .nitted-countdown {
     font-family: var(--font-heading);
     font-size: 2.5rem;
@@ -270,6 +274,8 @@
 </style>
 <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
 <div class="nitted-content">
+  <div class="nitted-drop-text nitted-drop-text-large">Dropping August 1st</div>
+  <div class="nitted-countdown" id="nitted-countdown"></div>
   <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
   <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
   <form method="post" action="/contact#ContactFooter" id="ContactFooter" class="nitted-email-form" accept-charset="UTF-8" autocomplete="off">
@@ -287,8 +293,6 @@
     {% endif %}
   </form>
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
-  <div class="nitted-drop-text">Dropping August 1st</div>
-  <div class="nitted-countdown" id="nitted-countdown"></div>
   <div class="nitted-infinite-gallery-outer">
     <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
   </div>
