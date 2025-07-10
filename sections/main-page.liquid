@@ -97,11 +97,10 @@
     right: 0;
     margin-left: auto;
     margin-right: auto;
-    max-width: 200px;
-    max-height: 100px;
+    max-width: 140px;
+    max-height: 70px;
     object-fit: contain;
     z-index: 10;
-    border: none !important;
   }
   .nitted-content {
     display: flex;
@@ -111,7 +110,7 @@
     width: 100vw;
     min-height: 100vh;
     padding-top: 7.5rem;
-    padding-bottom: 2rem;
+    padding-bottom: 0; /* Remove bottom padding so gallery sits higher */
     box-sizing: border-box;
     background: var(--beige) !important;
   }
@@ -196,18 +195,18 @@
   }
   .nitted-countdown {
     font-family: var(--font-heading);
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: var(--black);
     text-align: center;
-    margin: 2.5rem auto 2rem auto;
+    margin: 2rem auto 2.5rem auto;
     letter-spacing: 0.02em;
-    padding: 1.2rem 1.5rem;
+    padding: 2rem 3rem;
     background: var(--beige);
     border: 3px solid var(--black);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    max-width: 340px;
+    max-width: 500px;
     display: block;
     position: relative;
     overflow: hidden;
@@ -251,7 +250,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 48px;
+    margin-bottom: 60px; /* Move gallery up from bottom */
   }
   .nitted-infinite-gallery-inner {
     position: absolute;
@@ -262,40 +261,35 @@
     display: flex;
     align-items: center;
   }
-  .nitted-infinite-img-wrapper {
-    border: 3px solid #000;
-    border-radius: 18px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    height: 100%;
-  }
   .nitted-infinite-img {
     height: 220px;
     width: auto;
     object-fit: contain;
-    margin: 0;
+    margin: 0; /* Remove margin so border hugs image */
     user-select: none;
     pointer-events: none;
     background: none;
-    border: none !important;
-    border-radius: 0 !important;
+    border-radius: 18px !important;
+    border: 3px solid #000 !important;
     box-shadow: none;
     display: block;
     transition: none;
+    padding: 0; /* No padding so border hugs image */
   }
   @media (max-width: 700px) {
-    .nitted-logo-img { max-width: 120px; max-height: 60px; }
+    .nitted-logo-img { max-width: 80px; max-height: 40px; top: 1.2rem; }
     .nitted-content { padding-top: 5.5rem; }
     .nitted-hero-title { font-size: 1.4rem; }
     .nitted-email-form { max-width: 98vw; }
     .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
-    .nitted-countdown { font-size: 1.2rem; padding: 0.7rem 0.5rem; max-width: 90vw; }
-    .nitted-infinite-gallery-outer { height: 120px; margin-bottom: 24px; }
+    .nitted-countdown { 
+      font-size: 1.8rem; 
+      padding: 1.5rem 2rem; 
+      margin: 1.5rem auto 2rem auto;
+      max-width: 90vw;
+    }
+    .nitted-infinite-gallery-outer { height: 120px; margin-bottom: 30px; }
     .nitted-infinite-img { height: 100px; }
-    .nitted-infinite-img-wrapper { border-radius: 10px; }
     .nitted-drop-text-large { font-size: 2.2rem; }
     .nitted-countdown { font-size: 1.7rem; padding: 1.2rem 0.7rem; max-width: 98vw; }
     .nitted-hero-title { font-size: 1.3rem; }
@@ -375,21 +369,18 @@
   }
 
   function createSlot() {
-    var wrapper = document.createElement('div');
-    wrapper.className = 'nitted-infinite-img-wrapper';
     var img = document.createElement('img');
     img.className = 'nitted-infinite-img';
     img.draggable = false;
     img.style.width = imgWidth + 'px';
     img.style.height = imgHeight + 'px';
     img.style.objectFit = 'contain';
-    img.style.margin = '0';
+    img.style.margin = '0 ' + imgMargin + 'px';
     img.style.flex = '0 0 auto';
     img.style.position = 'absolute';
     img.style.top = '50%';
     img.style.transform = 'translateY(-50%)';
-    wrapper.appendChild(img);
-    return wrapper;
+    return img;
   }
 
   function fillSlots() {
