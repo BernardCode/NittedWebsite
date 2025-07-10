@@ -425,12 +425,17 @@
     for (var i = 0; i < slotCount; i++) {
       var imgIdx = firstIdx + i;
       var srcIdx = mod(imgIdx, imageSources.length);
-      var img = imgs[i];
+      var frame = imgs[i];
+      var img = frame.querySelector('img');
       if (img.src !== imageSources[srcIdx]) img.src = imageSources[srcIdx];
       img.alt = 'Nitted product photo ' + (srcIdx + 1);
       // Position slot 0 at the left edge, lay out to the right
       var x = (i * totalImgWidth) - offsetPx;
-      img.style.left = x + 'px';
+      frame.style.left = x + 'px';
+      frame.style.position = 'absolute';
+      frame.style.top = '50%';
+      frame.style.transform = 'translateY(-50%)';
+      frame.style.flex = '0 0 auto';
     }
   }
 
