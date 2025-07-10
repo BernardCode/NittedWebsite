@@ -211,19 +211,34 @@
     position: relative;
     overflow: hidden;
   }
-  .nitted-countdown::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-    animation: shimmer 3s ease-in-out infinite;
+  .nitted-hero-title {
+    font-size: 2.6rem;
+    font-weight: 700;
+    margin: 2.2rem 0 1.2rem 0;
   }
-  @keyframes shimmer {
-    0%, 100% { transform: translateX(-100%); }
-    50% { transform: translateX(100%); }
+  .nitted-hero-sub {
+    font-size: 1.5rem;
+    margin-bottom: 2.2rem;
+  }
+  .nitted-email-input {
+    font-size: 1.4rem;
+    padding: 1.7rem 1.5rem;
+  }
+  .nitted-email-btn {
+    font-size: 1.4rem;
+    padding: 1.7rem 0;
+  }
+  .nitted-hero-cta-sub {
+    font-size: 1.3rem;
+    margin-top: 1.2rem;
+    margin-bottom: 2.5rem;
+  }
+  .nitted-content-inner {
+    transform: translateY(-50px);
+  }
+  img, .nitted-infinite-img {
+    border-radius: 18px !important;
+    border: 3px solid #000 !important;
   }
   .nitted-infinite-gallery-outer {
     width: 100vw;
@@ -272,6 +287,13 @@
     }
     .nitted-infinite-gallery-outer { height: 120px; }
     .nitted-infinite-img { height: 100px; margin: 0 8px; }
+    .nitted-drop-text-large { font-size: 2.2rem; }
+    .nitted-countdown { font-size: 1.7rem; padding: 1.2rem 0.7rem; max-width: 98vw; }
+    .nitted-hero-title { font-size: 1.3rem; }
+    .nitted-hero-sub { font-size: 1.1rem; }
+    .nitted-email-input, .nitted-email-btn { font-size: 1.1rem; padding: 1.1rem 0.8rem; }
+    .nitted-hero-cta-sub { font-size: 1.05rem; }
+    .nitted-content-inner { transform: translateY(-30px); }
   }
 </style>
 <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
