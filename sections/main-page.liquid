@@ -262,19 +262,22 @@
     align-items: center;
   }
   .nitted-infinite-img {
+    width: 220px;
     height: 220px;
-    width: auto;
-    object-fit: contain;
-    margin: 0; /* Remove margin so border hugs image */
-    user-select: none;
-    pointer-events: none;
+    object-fit: cover;
+    margin: 0;
+    padding: 0;
     background: none;
     border-radius: 18px !important;
     border: 3px solid #000 !important;
     box-shadow: none;
     display: block;
     transition: none;
-    padding: 0; /* No padding so border hugs image */
+    user-select: none;
+    pointer-events: none;
+  }
+  @media (max-width: 700px) {
+    .nitted-infinite-img { width: 100px; height: 100px; }
   }
   @media (max-width: 700px) {
     .nitted-logo-img { max-width: 80px; max-height: 40px; top: 1.2rem; }
