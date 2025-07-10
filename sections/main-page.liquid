@@ -188,12 +188,36 @@
     letter-spacing: 0.02em;
   }
   .nitted-countdown {
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    color: #222;
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--black);
     text-align: center;
-    margin-bottom: 1.5rem;
-    letter-spacing: 0.04em;
+    margin: 2rem auto 2.5rem auto;
+    letter-spacing: 0.02em;
+    padding: 2rem 3rem;
+    background: var(--beige);
+    border: 3px solid var(--black);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    max-width: 500px;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .nitted-countdown::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
   }
   .nitted-infinite-gallery-outer {
     width: 100vw;
@@ -234,6 +258,12 @@
     .nitted-hero-title { font-size: 1.4rem; }
     .nitted-email-form { max-width: 98vw; }
     .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
+    .nitted-countdown { 
+      font-size: 1.8rem; 
+      padding: 1.5rem 2rem; 
+      margin: 1.5rem auto 2rem auto;
+      max-width: 90vw;
+    }
     .nitted-infinite-gallery-outer { height: 120px; }
     .nitted-infinite-img { height: 100px; margin: 0 8px; }
   }
@@ -257,7 +287,7 @@
     {% endif %}
   </form>
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
-  <div class="nitted-drop-text">Dropping August 8th</div>
+  <div class="nitted-drop-text">Dropping August 1st</div>
   <div class="nitted-countdown" id="nitted-countdown"></div>
   <div class="nitted-infinite-gallery-outer">
     <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
@@ -417,10 +447,10 @@
   rafUpdate();
 })();
 
-// Live countdown timer to August 8th, 2025, 12:00 PM local time
+// Live countdown timer to August 1st, 2025, 12:00 PM local time
 (function() {
-  // Set the target date to August 8th, 2025, 12:00 PM local time
-  const targetDate = new Date(2025, 7, 8, 12, 0, 0); // month is 0-indexed, so 7 = August
+  // Set the target date to August 1st, 2025, 12:00 PM local time
+  const targetDate = new Date(2025, 7, 1, 12, 0, 0); // month is 0-indexed, so 7 = August
 
   function updateCountdown() {
     const now = new Date();
