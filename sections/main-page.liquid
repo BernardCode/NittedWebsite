@@ -257,7 +257,7 @@
     {% endif %}
   </form>
   <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
-  <div class="nitted-drop-text">Dropping August 1st</div>
+  <div class="nitted-drop-text">Dropping August 8th</div>
   <div class="nitted-countdown" id="nitted-countdown"></div>
   <div class="nitted-infinite-gallery-outer">
     <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
@@ -417,10 +417,10 @@
   rafUpdate();
 })();
 
-// Local countdown timer to August 1st, 2025, 12:00am local time
+// Live countdown timer to August 8th, 2025, 12:00 PM local time
 (function() {
-  // Set the target date to August 1st, 2025, 12:00am local time
-  const targetDate = new Date(2025, 7 - 1, 1, 0, 0, 0); // month is 0-indexed
+  // Set the target date to August 8th, 2025, 12:00 PM local time
+  const targetDate = new Date(2025, 7, 8, 12, 0, 0); // month is 0-indexed, so 7 = August
 
   function updateCountdown() {
     const now = new Date();
