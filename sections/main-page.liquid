@@ -358,6 +358,18 @@
     </div>
   </div>
 </div>
+<!-- 3D T-shirt viewer -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<div class="nitted-3d-tshirt-container">
+  <model-viewer
+    src="https://models.babylonjs.com/CornellBox/tshirt.glb"
+    alt="3D view of a beige t-shirt"
+    auto-rotate
+    camera-controls
+    touch-action="pan-y"
+    style="width: 400px; height: 400px; background: #faf5ef; border-radius: 24px; border: 2px solid #000; margin: 2rem auto 2rem auto; display: block;"
+  ></model-viewer>
+</div>
 <script>
 // Robust, truly infinite, virtualized horizontal gallery (fixed slots, virtual scroll, no DOM jumps)
 (function() {
