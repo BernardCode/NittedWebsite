@@ -73,21 +73,47 @@
     font-weight: 400;
     margin: 0;
     padding: 0;
-    overflow: hidden !important;
+    /* Remove overflow: hidden and position: fixed to allow layout and scrolling */
     height: 100vh !important;
     min-height: 100vh !important;
-    position: fixed;
     width: 100vw;
   }
-  body, .nitted-main {
-    height: 100vh;
-    width: 100vw;
+  .nitted-main-flex {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     justify-content: center;
-    overflow: auto;
-    background: var(--beige) !important;
+    width: 100vw;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 3rem;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding-top: 4rem;
+  }
+  .nitted-content-inner {
+    flex: 1 1 0;
+    max-width: 600px;
+    min-width: 320px;
+  }
+  .nitted-3d-tshirt-container {
+    flex: 0 0 440px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 440px;
+    min-width: 320px;
+    margin: 0;
+    padding-top: 0.5rem;
+  }
+  .nitted-3d-tshirt-container model-viewer {
+    width: 400px !important;
+    height: 400px !important;
+    background: #faf5ef;
+    border-radius: 24px;
+    border: 2px solid #000;
+    margin: 0 auto;
+    display: block;
   }
   .nitted-logo-img {
     display: block;
@@ -330,45 +356,51 @@
     .nitted-hero-cta-sub { font-size: 1.05rem; }
     .nitted-content-inner { transform: translateY(-30px); }
   }
+  @media (max-width: 1100px) {
+    .nitted-main-flex { flex-direction: column; align-items: center; gap: 2rem; }
+    .nitted-3d-tshirt-container, .nitted-3d-tshirt-container model-viewer { width: 90vw !important; min-width: 0; }
+    .nitted-3d-tshirt-container model-viewer { height: 300px !important; }
+  }
 </style>
 <img src="{{ 'logo.png' | asset_url }}" alt="Nitted logo" class="nitted-logo-img" draggable="false">
-<div class="nitted-content-inner">
-  <div class="nitted-content">
-    <div class="nitted-drop-text nitted-drop-text-large">Dropping August 1st</div>
-    <div class="nitted-countdown" id="nitted-countdown"></div>
-    <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
-    <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
-    <form method="post" action="/contact#ContactFooter" id="ContactFooter" class="nitted-email-form" accept-charset="UTF-8" autocomplete="off">
-      <input type="hidden" name="form_type" value="customer" />
-      <input type="hidden" name="utf8" value="✓" />
-      <input type="email" id="NewsletterForm--main" name="contact[email]" class="nitted-email-input" autocorrect="off" autocapitalize="off" autocomplete="email" placeholder="Enter your email" required>
-      <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
-      {% if form.posted_successfully? %}
-        <div class="nitted-newsletter-success" style="color:#1a4d1a; font-size:1.1rem; margin-top:1.2rem; text-align:center;">Thank you for joining the waitlist! You're on the list for first access and exclusive offers.</div>
-      {% endif %}
-      {% if form.errors %}
-        <div class="nitted-newsletter-error" style="color:#b00; font-size:1rem; margin-top:0.5rem; text-align:center;">
-          {{ form.errors | default_errors }}
-        </div>
-      {% endif %}
-    </form>
-    <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
-    <div class="nitted-infinite-gallery-outer">
-      <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
+<div class="nitted-main-flex">
+  <div class="nitted-content-inner">
+    <div class="nitted-content">
+      <div class="nitted-drop-text nitted-drop-text-large">Dropping August 1st</div>
+      <div class="nitted-countdown" id="nitted-countdown"></div>
+      <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
+      <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
+      <form method="post" action="/contact#ContactFooter" id="ContactFooter" class="nitted-email-form" accept-charset="UTF-8" autocomplete="off">
+        <input type="hidden" name="form_type" value="customer" />
+        <input type="hidden" name="utf8" value="✓" />
+        <input type="email" id="NewsletterForm--main" name="contact[email]" class="nitted-email-input" autocorrect="off" autocapitalize="off" autocomplete="email" placeholder="Enter your email" required>
+        <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
+        {% if form.posted_successfully? %}
+          <div class="nitted-newsletter-success" style="color:#1a4d1a; font-size:1.1rem; margin-top:1.2rem; text-align:center;">Thank you for joining the waitlist! You're on the list for first access and exclusive offers.</div>
+        {% endif %}
+        {% if form.errors %}
+          <div class="nitted-newsletter-error" style="color:#b00; font-size:1rem; margin-top:0.5rem; text-align:center;">
+            {{ form.errors | default_errors }}
+          </div>
+        {% endif %}
+      </form>
+      <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
+      <div class="nitted-infinite-gallery-outer">
+        <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
+      </div>
     </div>
   </div>
-</div>
-<!-- 3D T-shirt viewer -->
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-<div class="nitted-3d-tshirt-container">
-  <model-viewer
-    src="https://models.babylonjs.com/CornellBox/tshirt.glb"
-    alt="3D view of a beige t-shirt"
-    auto-rotate
-    camera-controls
-    touch-action="pan-y"
-    style="width: 400px; height: 400px; background: #faf5ef; border-radius: 24px; border: 2px solid #000; margin: 2rem auto 2rem auto; display: block;"
-  ></model-viewer>
+  <!-- 3D T-shirt viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <div class="nitted-3d-tshirt-container">
+    <model-viewer
+      src="https://models.babylonjs.com/CornellBox/tshirt.glb"
+      alt="3D view of a beige t-shirt"
+      auto-rotate
+      camera-controls
+      touch-action="pan-y"
+    ></model-viewer>
+  </div>
 </div>
 <script>
 // Robust, truly infinite, virtualized horizontal gallery (fixed slots, virtual scroll, no DOM jumps)
