@@ -17,7 +17,7 @@ class ModelAnimationController {
     this.modelViewer.style.opacity = "0.7";
     this.modelViewer.style.transition = "opacity 0.5s ease";
 
-    // Configure model viewer settings
+    // Configure model viewer settings for better performance
     this.modelViewer.exposure = 1.2; // Increase exposure for better visibility
     this.modelViewer.shadowIntensity = 0; // Remove shadows
     this.modelViewer.environmentImage = null; // Remove environment reflections
@@ -26,6 +26,11 @@ class ModelAnimationController {
     this.modelViewer.fieldOfView = "30deg"; // More zoomed in
     this.modelViewer.minCameraOrbit = "auto auto 1.5m"; // Closer minimum zoom
     this.modelViewer.maxCameraOrbit = "auto auto 4m"; // Reasonable maximum zoom
+
+    // Performance optimizations
+    this.modelViewer.renderScale = 0.8; // Slightly lower resolution for better performance
+    this.modelViewer.powerPreference = "high-performance";
+    this.modelViewer.autoRotateDelay = 0;
 
     // Set up event listeners
     this.modelViewer.addEventListener("load", () => {
@@ -81,39 +86,59 @@ class ModelAnimationController {
 
     // Check if the model has animations
     const animations = model.animations;
-    if (animations && animations.length > 0 && window.THREE) {
-      try {
-        // Play the first animation using THREE.js
-        const mixer = new window.THREE.AnimationMixer(model);
-        const action = mixer.clipAction(animations[0]);
-        action.setLoop(window.THREE.LoopOnce);
-        action.clampWhenFinished = true;
-        action.play();
+    console.log("Model animations found:", animations ? animations.length : 0);
 
-        // Update the mixer during the animation
-        const clock = new window.THREE.Clock();
-        const animate = () => {
-          if (!this.isInitialAnimationComplete) {
-            const delta = clock.getDelta();
-            mixer.update(delta);
-            requestAnimationFrame(animate);
-          }
-        };
-        animate();
+    if (animations && animations.length > 0) {
+      console.log(
+        "Animation names:",
+        animations.map((anim) => anim.name)
+      );
+      console.log("First animation duration:", animations[0].duration);
 
-        // Mark animation as complete after duration
-        setTimeout(() => {
-          this.isInitialAnimationComplete = true;
-          this.startAutoRotate();
-        }, this.initialAnimationDuration);
-      } catch (error) {
-        console.log(
-          "Animation playback failed, falling back to camera animation:",
-          error
-        );
+      if (window.THREE) {
+        try {
+          // Play the first animation using THREE.js
+          const mixer = new window.THREE.AnimationMixer(model);
+          const action = mixer.clipAction(animations[0]);
+          action.setLoop(window.THREE.LoopOnce);
+          action.clampWhenFinished = true;
+          action.timeScale = 1.0; // Normal speed
+          action.play();
+
+          console.log("Animation started playing");
+
+          // Update the mixer during the animation
+          const clock = new window.THREE.Clock();
+          const animate = () => {
+            if (!this.isInitialAnimationComplete) {
+              const delta = clock.getDelta();
+              mixer.update(delta);
+              requestAnimationFrame(animate);
+            }
+          };
+          animate();
+
+          // Mark animation as complete after the actual animation duration
+          const animationDuration = animations[0].duration * 1000; // Convert to milliseconds
+          console.log("Animation will complete in:", animationDuration, "ms");
+
+          setTimeout(() => {
+            this.isInitialAnimationComplete = true;
+            this.startAutoRotate();
+          }, Math.max(animationDuration, this.initialAnimationDuration));
+        } catch (error) {
+          console.log(
+            "Animation playback failed, falling back to camera animation:",
+            error
+          );
+          this.playCameraAnimation();
+        }
+      } else {
+        console.log("THREE.js not available, using camera animation");
         this.playCameraAnimation();
       }
     } else {
+      console.log("No animations found, using camera animation");
       // If no animations, play a camera animation instead
       this.playCameraAnimation();
     }
@@ -132,11 +157,7 @@ class ModelAnimationController {
         const startPhi = 0; // Level view
         const startRadius = 2.5; // Close view
 
-        // End with a slight rotation to show the model
-        const endTheta = Math.PI * 0.25; // 45 degrees rotation
-        const endPhi = Math.PI * 0.1; // Slight tilt up
-        const endRadius = 2.2; // Slightly closer
-
+        // Create a more interesting animation path
         const animate = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
@@ -145,10 +166,11 @@ class ModelAnimationController {
             // Create a smooth easing function
             const easeOut = 1 - Math.pow(1 - progress, 3);
 
-            // Animate from front view to slightly rotated view
-            const newTheta = startTheta + (endTheta - startTheta) * easeOut;
-            const newPhi = startPhi + (endPhi - startPhi) * easeOut;
-            const newRadius = startRadius + (endRadius - startRadius) * easeOut;
+            // Create a figure-8 pattern for more interesting movement
+            const t = progress * Math.PI * 2;
+            const newTheta = Math.sin(t) * 0.3; // Gentle side-to-side
+            const newPhi = Math.sin(t * 2) * 0.1; // Gentle up-down
+            const newRadius = startRadius + Math.sin(t * 3) * 0.3; // Gentle zoom in/out
 
             try {
               this.modelViewer.setCameraOrbit(
