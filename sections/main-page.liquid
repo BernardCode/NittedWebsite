@@ -402,7 +402,14 @@
   </div>
   <!-- 3D T-shirt viewer -->
   <div class="nitted-3d-tshirt-container">
-    <spline-viewer url="https://prod.spline.design/hlgqhdLxzDCPRJze/scene.splinecode"></spline-viewer>
+    <model-viewer
+      src="{{ 'beige-tshirt.glb' | asset_url }}"
+      alt="3D view of a beige t-shirt"
+      auto-rotate
+      camera-controls
+      touch-action="pan-y"
+      style="width: 400px; height: 400px; background: #faf5ef; border-radius: 24px; margin: 0 auto; display: block;"
+    ></model-viewer>
   </div>
 </div>
 <script>
