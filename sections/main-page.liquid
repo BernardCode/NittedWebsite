@@ -16,6 +16,7 @@
 
 <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.27/build/spline-viewer.js"></script>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script src="{{ '3d-model-animation.js' | asset_url }}" defer="defer"></script>
 <div class="page-width page-width--narrow section-{{ section.id }}-padding">
   <h1 class="main-page-title page-title h0{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
     {{ page.title | escape }}
@@ -117,6 +118,32 @@
     border-radius: 0;
     margin: 0 auto;
     display: block;
+    position: relative;
+  }
+  
+  .nitted-3d-tshirt-container model-viewer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid #e0d5c5;
+    border-top: 3px solid #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1;
+    opacity: 0.7;
+  }
+  
+  .nitted-3d-tshirt-container model-viewer[loaded]::before {
+    display: none;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   .nitted-logo-img {
     display: block;
@@ -405,7 +432,6 @@
     <model-viewer
       src="{{ 'beige-tshirt.glb' | asset_url }}"
       alt="3D view of a beige t-shirt"
-      auto-rotate
       camera-controls
       touch-action="pan-y"
       style="width: 400px; height: 400px; background: #faf5ef; border-radius: 24px; margin: 0 auto; display: block;"

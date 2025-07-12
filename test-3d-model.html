@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Model Animation Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        background: #faf5ef;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .model-container {
+        width: 400px;
+        height: 400px;
+        margin: 20px auto;
+        position: relative;
+      }
+      model-viewer {
+        width: 100% !important;
+        height: 100% !important;
+        background: #faf5ef;
+        border-radius: 24px;
+        position: relative;
+      }
+      model-viewer::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        margin: -20px 0 0 -20px;
+        border: 3px solid #e0d5c5;
+        border-top: 3px solid #000;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 1;
+        opacity: 0.7;
+      }
+      model-viewer[loaded]::before {
+        display: none;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .instructions {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>3D Model Animation Test</h1>
+      <p>
+        Testing the enhanced 3D model with initial animation and interaction
+      </p>
+
+      <div class="model-container">
+        <model-viewer
+          src="assets/beige-tshirt.glb"
+          alt="3D view of a beige t-shirt"
+          camera-controls
+          touch-action="pan-y"
+        ></model-viewer>
+      </div>
+
+      <div class="instructions">
+        <h3>Expected Behavior:</h3>
+        <ol>
+          <li>
+            <strong>Initial Animation:</strong> The model should play an initial
+            animation (either built-in or camera animation) for 3 seconds
+          </li>
+          <li>
+            <strong>Loading Indicator:</strong> A spinning loader should appear
+            while the model loads
+          </li>
+          <li>
+            <strong>Auto-rotation:</strong> After the initial animation, the
+            model should start spinning autonomously
+          </li>
+          <li>
+            <strong>User Interaction:</strong> You can drag to rotate, scroll to
+            zoom, and the auto-rotation will pause during interaction
+          </li>
+          <li>
+            <strong>Resume Auto-rotation:</strong> 2 seconds after you stop
+            interacting, auto-rotation should resume
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <script
+      type="module"
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
+    ></script>
+    <script src="assets/3d-model-animation.js"></script>
+  </body>
+</html>
