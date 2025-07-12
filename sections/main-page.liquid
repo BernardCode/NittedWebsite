@@ -119,6 +119,10 @@
     margin: 0 auto;
     display: block;
     position: relative;
+    /* Ensure proper rendering */
+    --poster-color: transparent;
+    --progress-bar-color: transparent;
+    --progress-mask: transparent;
   }
   
   .nitted-3d-tshirt-container model-viewer::before {
@@ -434,6 +438,15 @@
       alt="3D view of a beige t-shirt"
       camera-controls
       touch-action="pan-y"
+      exposure="1.2"
+      shadow-intensity="0"
+      shadow-softness="0"
+      camera-orbit="0deg 0deg 2.5m"
+      field-of-view="30deg"
+      min-camera-orbit="auto auto 1.5m"
+      max-camera-orbit="auto auto 4m"
+      environment-image="neutral"
+      skybox-image=""
       style="width: 400px; height: 400px; background: #faf5ef; border-radius: 24px; margin: 0 auto; display: block;"
     ></model-viewer>
   </div>

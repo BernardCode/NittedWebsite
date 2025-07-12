@@ -17,8 +17,19 @@ class ModelAnimationController {
     this.modelViewer.style.opacity = "0.7";
     this.modelViewer.style.transition = "opacity 0.5s ease";
 
+    // Configure model viewer settings
+    this.modelViewer.exposure = 1.2; // Increase exposure for better visibility
+    this.modelViewer.shadowIntensity = 0; // Remove shadows
+    this.modelViewer.environmentImage = null; // Remove environment reflections
+    this.modelViewer.shadowSoftness = 0; // Remove soft shadows
+    this.modelViewer.cameraOrbit = "0deg 0deg 2.5m"; // Start directly in front, closer
+    this.modelViewer.fieldOfView = "30deg"; // More zoomed in
+    this.modelViewer.minCameraOrbit = "auto auto 1.5m"; // Closer minimum zoom
+    this.modelViewer.maxCameraOrbit = "auto auto 4m"; // Reasonable maximum zoom
+
     // Set up event listeners
     this.modelViewer.addEventListener("load", () => {
+      this.fixMaterials();
       this.playInitialAnimation();
     });
 
@@ -109,24 +120,22 @@ class ModelAnimationController {
   }
 
   playCameraAnimation() {
-    // Create a simple camera animation that zooms in and rotates
+    // Create a simple camera animation that starts from front view
     const startTime = Date.now();
     const duration = this.initialAnimationDuration;
 
     // Wait a bit for the model to be fully loaded
     setTimeout(() => {
       try {
-        // Store initial camera position
-        const initialCameraOrbit = this.modelViewer.getCameraOrbit();
+        // Start from front view (0 degrees theta, 0 degrees phi)
+        const startTheta = 0; // Front view
+        const startPhi = 0; // Level view
+        const startRadius = 2.5; // Close view
 
-        if (!initialCameraOrbit) {
-          // Fallback if camera orbit is not available
-          setTimeout(() => {
-            this.isInitialAnimationComplete = true;
-            this.startAutoRotate();
-          }, 1000);
-          return;
-        }
+        // End with a slight rotation to show the model
+        const endTheta = Math.PI * 0.25; // 45 degrees rotation
+        const endPhi = Math.PI * 0.1; // Slight tilt up
+        const endRadius = 2.2; // Slightly closer
 
         const animate = () => {
           const elapsed = Date.now() - startTime;
@@ -136,19 +145,19 @@ class ModelAnimationController {
             // Create a smooth easing function
             const easeOut = 1 - Math.pow(1 - progress, 3);
 
-            // Animate camera orbit (zoom in and rotate)
-            const newRadius = initialCameraOrbit.radius * (1 - easeOut * 0.3); // Zoom in 30%
-            const newTheta = initialCameraOrbit.theta + easeOut * Math.PI * 2; // Full rotation
-            const newPhi = initialCameraOrbit.phi + easeOut * Math.PI * 0.5; // Tilt up
+            // Animate from front view to slightly rotated view
+            const newTheta = startTheta + (endTheta - startTheta) * easeOut;
+            const newPhi = startPhi + (endPhi - startPhi) * easeOut;
+            const newRadius = startRadius + (endRadius - startRadius) * easeOut;
 
             try {
               this.modelViewer.setCameraOrbit(
                 newTheta,
                 newPhi,
                 newRadius,
-                initialCameraOrbit.target.x,
-                initialCameraOrbit.target.y,
-                initialCameraOrbit.target.z
+                0, // target x
+                0, // target y
+                0 // target z
               );
             } catch (error) {
               console.log("Camera animation error:", error);
@@ -190,6 +199,34 @@ class ModelAnimationController {
       // Add a subtle cursor hint
       this.modelViewer.style.cursor = "grab";
       this.modelViewer.title = "Drag to rotate • Scroll to zoom";
+    }
+  }
+
+  fixMaterials() {
+    // Fix material rendering issues
+    try {
+      const model = this.modelViewer.model;
+      if (model && window.THREE) {
+        // Traverse all objects in the model
+        model.traverse((child) => {
+          if (child.isMesh && child.material) {
+            // Ensure materials are not transparent unless intended
+            if (Array.isArray(child.material)) {
+              child.material.forEach((mat) => {
+                mat.transparent = false;
+                mat.opacity = 1.0;
+                mat.side = window.THREE.DoubleSide; // Render both sides
+              });
+            } else {
+              child.material.transparent = false;
+              child.material.opacity = 1.0;
+              child.material.side = window.THREE.DoubleSide; // Render both sides
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.log("Material fix failed:", error);
     }
   }
 
