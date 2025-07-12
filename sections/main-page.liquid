@@ -133,10 +133,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100vw;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
     min-height: 100vh;
     padding-top: 7.5rem;
-    padding-bottom: 0; /* Remove bottom padding so gallery sits higher */
+    padding-bottom: 0;
     box-sizing: border-box;
     background: var(--beige) !important;
   }
@@ -295,7 +297,9 @@
     transform: scale(1.25); /* Zoom in to fill frame and even out border */
   }
   .nitted-infinite-gallery-outer {
-    width: 100vw;
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem auto 0 auto;
     height: 260px;
     overflow: hidden;
     position: relative;
@@ -304,7 +308,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 60px; /* Move gallery up from bottom */
+    margin-bottom: 60px;
   }
   .nitted-infinite-gallery-inner {
     position: absolute;
