@@ -1,0 +1,43 @@
+/* 3D Model Fixes */
+model-viewer {
+  --poster-color: transparent;
+  --progress-bar-color: transparent;
+  --progress-bar-height: 0px;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Remove background and shadow */
+model-viewer::part(default-progress-bar) {
+  display: none !important;
+}
+
+model-viewer::part(default-ar-button) {
+  display: none;
+}
+
+/* Fix for model transparency and lighting */
+model-viewer#shopify-model-viewer-ui {
+  --environment-image: none;
+  --shadow-intensity: 0;
+  --shadow-softness: 0;
+  --shadow-accent-blur: 0;
+  --shadow-accent-opacity: 0;
+  --shadow-accent-color: transparent;
+  --shadow-direction: 0deg;
+  --shadow-color: transparent;
+  --poster-color: transparent;
+  --poster-image: none;
+  --progress-mask: transparent;
+}
+
+/* Ensure model is not transparent and has proper lighting */
+model-viewer {
+  --material-override-base: 1 1 1 1;
+  --material-override-emissive-factor: 1 1 1;
+  --material-override-roughness-factor: 1;
+  --material-override-metallic-factor: 0;
+  --material-override-alpha-mode: "OPAQUE";
+  --material-override-double-sided: true;
+  --material-override-unlit: false;
+}

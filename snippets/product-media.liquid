@@ -95,7 +95,18 @@
       {%- when 'video' -%}
         {{ media | media_tag: image_size: '2048x', autoplay: true, loop: loop, controls: true, preload: 'none' }}
       {%- when 'model' -%}
-        {{ media | media_tag: image_size: '2048x', toggleable: true }}
+        {{ media | media_tag: 
+          image_size: '2048x',
+          toggleable: true,
+          environment_image: 'none',
+          shadow_intensity: '0',
+          exposure: '1',
+          camera_controls: true,
+          auto_rotate: true,
+          ar: true,
+          ar_muted_autoplay: false,
+          style: 'background-color: transparent;' 
+        }}
     {%- endcase -%}
   </template>
 
