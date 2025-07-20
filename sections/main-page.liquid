@@ -431,14 +431,18 @@
       </div>
     </div>
   </div>
-  <!-- 3D T-shirt viewer (new, minimal) -->
-  <div class="nitted-3d-tshirt-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 2rem 0;">
+  <!-- 3D T-shirt viewer (improved lighting, solid background) -->
+  <div class="nitted-3d-tshirt-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 2rem 0; background: #faf5ef !important;">
     <model-viewer
       src="{{ 'shirt3dmodel.glb' | asset_url }}"
       alt="3D view of a shirt"
       camera-controls
       auto-rotate
-      style="width: 400px; height: 400px; background: #faf5ef; border-radius: 24px; margin: 0 auto; display: block;"
+      exposure="1.3"
+      shadow-intensity="0.7"
+      shadow-softness="0.8"
+      environment-image="{{ 'studio.hdr' | asset_url }}"  <!-- Replace with your HDRI filename if different -->
+      style="width: 400px; height: 400px; background: #faf5ef !important; border-radius: 24px; margin: 0 auto; display: block;"
     ></model-viewer>
   </div>
 </div>
