@@ -34,6 +34,11 @@ class ModelAnimationController {
 
     // Set up event listeners
     this.modelViewer.addEventListener("load", () => {
+      if (!window.THREE) {
+        console.warn(
+          "window.THREE is not available. Animations may not play. Do not import Three.js directly; model-viewer provides it internally."
+        );
+      }
       this.fixMaterials();
       this.playInitialAnimation();
     });
