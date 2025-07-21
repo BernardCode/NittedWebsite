@@ -1,0 +1,228 @@
+<style>
+/* --- Landing Page Styles --- */
+.nitted-landing {
+  font-family: 'Inter', 'Satoshi', 'Manrope', Arial, sans-serif;
+  background: #FAF5EF;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+.nitted-hero {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+@media (min-width: 900px) {
+  .nitted-hero {
+    flex-direction: row;
+  }
+}
+.nitted-hero-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 24px 24px 24px;
+  background: #EFE9E1;
+}
+.nitted-hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: -1px;
+}
+.nitted-hero-date {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.nitted-countdown {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  background: #fff8;
+  border-radius: 1rem;
+  padding: 1rem 2.5rem;
+  font-size: 2rem;
+  font-family: monospace;
+  font-weight: 700;
+  box-shadow: 0 2px 12px 0 #0001;
+  margin-bottom: 2rem;
+}
+.nitted-hero-sub {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.nitted-hero-desc {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.nitted-form {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 1.5rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.nitted-form input[type="email"] {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #ccc;
+  font-size: 1.1rem;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 1px 4px #0001;
+}
+.nitted-form button {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.nitted-form button:hover {
+  background: #333;
+}
+.nitted-form-caption {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+}
+.nitted-hero-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EFE9E1;
+  min-height: 350px;
+  padding: 24px 0;
+}
+.nitted-model-viewer {
+  width: 100%;
+  max-width: 480px;
+  height: 480px;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 24px 0 #0002;
+}
+@media (max-width: 899px) {
+  .nitted-hero-right {
+    min-height: 320px;
+    padding: 0 0 24px 0;
+  }
+  .nitted-model-viewer {
+    max-width: 340px;
+    height: 340px;
+  }
+}
+.nitted-product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 3rem auto 0 auto;
+  width: 100%;
+}
+@media (max-width: 899px) {
+  .nitted-product-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+.nitted-product-img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px 0 #0001;
+  background: #fff;
+}
+.nitted-product-img.blur {
+  filter: blur(6px) brightness(1.1);
+  transform: scale(1.05);
+}
+</style>
+
+<section class="nitted-landing">
+  <div class="nitted-hero">
+    <!-- Left: Text & Form -->
+    <div class="nitted-hero-left">
+      <div class="nitted-hero-title">nitted</div>
+      <div class="nitted-hero-date">Dropping August 2nd</div>
+      <div class="nitted-countdown" id="nitted-countdown">
+        <span><span id="nitted-days">00</span> <span style="font-size:0.8rem;">DAYS</span></span>
+        <span>:</span>
+        <span><span id="nitted-hours">00</span> <span style="font-size:0.8rem;">HRS</span></span>
+        <span>:</span>
+        <span><span id="nitted-minutes">00</span> <span style="font-size:0.8rem;">MIN</span></span>
+        <span>:</span>
+        <span><span id="nitted-seconds">00</span> <span style="font-size:0.8rem;">SEC</span></span>
+      </div>
+      <div class="nitted-hero-sub">The Coziest Drop Is Coming ☁️</div>
+      <div class="nitted-hero-desc">Minimal essentials for comfort, calm, and everyday softness.</div>
+      <form class="nitted-form">
+        <input type="email" placeholder="Enter your email" required />
+        <button type="submit">Join the Waitlist →</button>
+        <div class="nitted-form-caption">You'll get first access & a secret discount 👀</div>
+      </form>
+    </div>
+    <!-- Right: 3D Model -->
+    <div class="nitted-hero-right">
+      <model-viewer
+        src="{{ 'shirt.glb' | asset_url }}"
+        alt="3D model"
+        auto-rotate
+        camera-controls
+        ar
+        class="nitted-model-viewer"
+        style="background: #fff;"
+        exposure="1.1"
+        shadow-intensity="0.7"
+      ></model-viewer>
+    </div>
+  </div>
+  <!-- Product Grid -->
+  <div class="nitted-product-grid">
+    <img src="{{ 'shirt1.jpg' | asset_url }}" alt="Shirt" class="nitted-product-img" />
+    <img src="{{ 'shirt2.jpg' | asset_url }}" alt="Shirt Blurred" class="nitted-product-img blur" />
+    <img src="{{ 'shirt3.jpg' | asset_url }}" alt="Shirt" class="nitted-product-img" />
+  </div>
+</section>
+
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script>
+// Countdown Timer to August 2, 2025
+(function() {
+  function pad(n) { return n < 10 ? '0' + n : n; }
+  function updateCountdown() {
+    var target = new Date('2025-08-02T00:00:00Z');
+    var now = new Date();
+    var diff = target - now;
+    if (diff < 0) diff = 0;
+    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    var minutes = Math.floor((diff / (1000 * 60)) % 60);
+    var seconds = Math.floor((diff / 1000) % 60);
+    document.getElementById('nitted-days').textContent = pad(days);
+    document.getElementById('nitted-hours').textContent = pad(hours);
+    document.getElementById('nitted-minutes').textContent = pad(minutes);
+    document.getElementById('nitted-seconds').textContent = pad(seconds);
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+})();
+</script> 
