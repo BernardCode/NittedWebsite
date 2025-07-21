@@ -26,11 +26,11 @@ function ShirtModel({ autoRotate, onRotationEnd }) {
 // --- Countdown Timer ---
 function Countdown() {
   const [remaining, setRemaining] = useState(
-    dayjs.duration(dayjs("2025-08-01").diff(dayjs()))
+    dayjs.duration(dayjs("2025-08-02").diff(dayjs()))
   );
   useEffect(() => {
     const interval = setInterval(() => {
-      setRemaining(dayjs.duration(dayjs("2025-08-01").diff(dayjs())));
+      setRemaining(dayjs.duration(dayjs("2025-08-02").diff(dayjs())));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -232,7 +232,7 @@ export default function NittedLandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              Dropping August 1st
+              Dropping August 2nd
             </motion.h2>
             <Countdown />
             <motion.h3
