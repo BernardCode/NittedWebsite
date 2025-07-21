@@ -26,12 +26,11 @@
   padding: 48px 24px 24px 24px;
   background: #EFE9E1;
 }
-.nitted-hero-title {
-  font-size: 2.5rem;
-  font-weight: 800;
+.nitted-logo-img {
+  width: 180px;
+  max-width: 80vw;
   margin-bottom: 2rem;
-  text-align: center;
-  letter-spacing: -1px;
+  display: block;
 }
 .nitted-hero-date {
   font-size: 2rem;
@@ -159,10 +158,10 @@
 
 <section class="nitted-landing">
   <div class="nitted-hero">
-    <!-- Left: Text & Form -->
+    <!-- Left: Logo, Text & Form -->
     <div class="nitted-hero-left">
-      <div class="nitted-hero-title">nitted</div>
-      <div class="nitted-hero-date">Dropping August 2nd</div>
+      <img src="{{ 'logo.png' | asset_url }}" alt="nitted logo" class="nitted-logo-img" />
+      <div class="nitted-hero-date">Dropping August 1st</div>
       <div class="nitted-countdown" id="nitted-countdown">
         <span><span id="nitted-days">00</span> <span style="font-size:0.8rem;">DAYS</span></span>
         <span>:</span>
@@ -183,7 +182,7 @@
     <!-- Right: 3D Model -->
     <div class="nitted-hero-right">
       <model-viewer
-        src="{{ 'shirt.glb' | asset_url }}"
+        src="{{ 'shirt3dmodel.glb' | asset_url }}"
         alt="3D model"
         auto-rotate
         camera-controls
@@ -197,19 +196,19 @@
   </div>
   <!-- Product Grid -->
   <div class="nitted-product-grid">
-    <img src="{{ 'shirt1.jpg' | asset_url }}" alt="Shirt" class="nitted-product-img" />
-    <img src="{{ 'shirt2.jpg' | asset_url }}" alt="Shirt Blurred" class="nitted-product-img blur" />
-    <img src="{{ 'shirt3.jpg' | asset_url }}" alt="Shirt" class="nitted-product-img" />
+    <img src="{{ 'product-photo2.png' | asset_url }}" alt="Shirt Blurred" class="nitted-product-img blur" />
+    <img src="{{ 'product-photo1.png' | asset_url }}" alt="Shirt" class="nitted-product-img" />
+    <img src="{{ 'product-photo2.png' | asset_url }}" alt="Shirt Blurred" class="nitted-product-img blur" />
   </div>
 </section>
 
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script>
-// Countdown Timer to August 2, 2025
+// Countdown Timer to August 1, 2025
 (function() {
   function pad(n) { return n < 10 ? '0' + n : n; }
   function updateCountdown() {
-    var target = new Date('2025-08-02T00:00:00Z');
+    var target = new Date('2025-08-01T00:00:00Z');
     var now = new Date();
     var diff = target - now;
     if (diff < 0) diff = 0;
