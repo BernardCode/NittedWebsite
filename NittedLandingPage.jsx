@@ -213,66 +213,116 @@ export default function NittedLandingPage() {
         transition: "background 0.7s cubic-bezier(.4,0,.2,1)",
       }}
     >
-      {/* 3D Section */}
-      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-        <AnimatePresence>
-          <motion.div
-            key="canvas"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0 z-10"
+      {/* 3D Split Hero Section */}
+      <section className="relative h-screen w-full flex flex-col md:flex-row items-stretch justify-stretch overflow-hidden">
+        {/* Left: Text Content */}
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 z-20 bg-transparent">
+          <motion.h1
+            className="mt-10 md:mt-0 text-3xl sm:text-5xl font-extrabold tracking-tight text-black/80 select-none drop-shadow-lg text-center md:text-left"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
           >
-            <Canvas
-              ref={canvasRef}
-              camera={{ position: [0, 0.7, 2.2], fov: 32 }}
-              style={{
-                width: "100vw",
-                height: "100vh",
-                background: "transparent",
-              }}
-              shadows
+            nitted
+          </motion.h1>
+          <div className="w-full max-w-lg mx-auto mt-8">
+            <motion.h2
+              className="text-4xl sm:text-5xl font-extrabold mb-6 text-center md:text-left font-sans tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              <ambientLight intensity={0.7} />
-              <directionalLight
-                position={[2, 4, 2]}
-                intensity={0.7}
-                castShadow
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
+              Dropping August 1st
+            </motion.h2>
+            <Countdown />
+            <motion.h3
+              className="mt-8 text-2xl font-semibold text-center md:text-left font-sans"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              The Coziest Drop Is Coming ☁️
+            </motion.h3>
+            <motion.p
+              className="mt-4 text-lg text-center md:text-left max-w-xl text-gray-700"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              Minimal essentials for comfort, calm, and everyday softness.
+            </motion.p>
+            <form className="w-full mt-8 flex flex-col items-center gap-3">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full rounded-lg px-5 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black text-lg bg-white shadow-sm font-sans"
               />
-              <Suspense fallback={<Html center>Loading…</Html>}>
-                <ShirtModel
-                  autoRotate={autoRotate}
-                  onRotationEnd={handleRotationEnd}
+              <button
+                type="submit"
+                className="w-full bg-black text-white rounded-lg py-3 text-lg font-semibold mt-2 transition hover:bg-gray-900 shadow-md"
+              >
+                Join the Waitlist →
+              </button>
+              <span className="text-xs text-gray-500 mt-1 text-center">
+                You'll get first access & a secret discount 👀
+              </span>
+            </form>
+          </div>
+        </div>
+        {/* Right: 3D Model */}
+        <div className="w-full md:w-1/2 h-96 md:h-full relative flex items-center justify-center bg-transparent">
+          <AnimatePresence>
+            <motion.div
+              key="canvas"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <Canvas
+                ref={canvasRef}
+                camera={{ position: [0, 0.7, 2.2], fov: 32 }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background: "transparent",
+                }}
+                shadows
+              >
+                <ambientLight intensity={0.7} />
+                <directionalLight
+                  position={[2, 4, 2]}
+                  intensity={0.7}
+                  castShadow
+                  shadow-mapSize-width={1024}
+                  shadow-mapSize-height={1024}
                 />
-              </Suspense>
-              {showControls && (
-                <OrbitControls enablePan enableZoom enableRotate />
-              )}
-            </Canvas>
+                <Suspense fallback={<Html center>Loading…</Html>}>
+                  <ShirtModel
+                    autoRotate={autoRotate}
+                    onRotationEnd={handleRotationEnd}
+                  />
+                </Suspense>
+                {showControls && (
+                  <OrbitControls enablePan enableZoom enableRotate />
+                )}
+              </Canvas>
+            </motion.div>
+          </AnimatePresence>
+          {/* Scroll Down Indicator (mobile only) */}
+          <motion.div
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center md:hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+          >
+            <span className="text-sm font-medium text-black/60 mb-1">
+              Scroll
+            </span>
+            <span className="animate-bounce text-2xl">↓</span>
           </motion.div>
-        </AnimatePresence>
-        {/* Overlay brand name */}
-        <motion.h1
-          className="absolute top-10 left-1/2 -translate-x-1/2 text-3xl sm:text-5xl font-extrabold tracking-tight text-black/80 z-20 select-none drop-shadow-lg"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          nitted
-        </motion.h1>
-        {/* Scroll Down Indicator */}
-        <motion.div
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-        >
-          <span className="text-sm font-medium text-black/60 mb-1">Scroll</span>
-          <span className="animate-bounce text-2xl">↓</span>
-        </motion.div>
+        </div>
       </section>
       {/* Drop Section */}
       <DropSection />
