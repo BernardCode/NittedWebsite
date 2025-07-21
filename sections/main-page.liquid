@@ -1,625 +1,227 @@
-{{ 'section-main-page.css' | asset_url | stylesheet_tag }}
-
-{%- style -%}
-  .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
-  }
-
-  @media screen and (min-width: 750px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    }
-  }
-{%- endstyle -%}
-
-<script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.27/build/spline-viewer.js"></script>
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-<script src="{{ '3d-model-animation.js' | asset_url }}" defer="defer"></script>
-<div class="page-width page-width--narrow section-{{ section.id }}-padding">
-  <h1 class="main-page-title page-title h0{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-    {{ page.title | escape }}
-  </h1>
-  <div class="rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-    {{ page.content }}
-  </div>
-</div>
-
-{% schema %}
-{
-  "name": "t:sections.main-page.name",
-  "tag": "section",
-  "class": "section",
-  "settings": [
-    {
-      "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 36
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
-    }
-  ]
-}
-{% endschema %}
-
-<!-- Nitted Waitlist Minimal Landing Page Section with Animated, Large, Horizontal Product Gallery and Logo -->
 <style>
-  :root {
-    --beige: #FAF5EF;
-    --black: #000000;
-    --radius: 2.2rem;
-    --font-heading: 'Poppins', 'Satoshi', Arial, sans-serif;
-    --font-body: 'Inter', 'Open Sans', Arial, sans-serif;
-  }
-  html, body {
-    background: var(--beige) !important;
-    color: var(--black);
-    font-family: var(--font-body);
-    font-weight: 400;
-    margin: 0;
-    padding: 0;
-    /* Remove overflow: hidden and position: fixed to allow layout and scrolling */
-    height: 100vh !important;
-    min-height: 100vh !important;
-    width: 100vw;
-  }
-  .nitted-main-flex {
-    display: flex;
+/* --- Landing Page Styles --- */
+.nitted-landing {
+  font-family: 'Inter', 'Satoshi', 'Manrope', Arial, sans-serif;
+  background: #FAF5EF;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+.nitted-hero {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+@media (min-width: 900px) {
+  .nitted-hero {
     flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100vw;
-    max-width: 1400px;
-    margin: 0 auto;
-    gap: 3rem;
-    min-height: 100vh;
-    box-sizing: border-box;
-    padding-top: 4rem;
   }
-  .nitted-content-inner {
-    flex: 1 1 0;
-    max-width: 600px;
-    min-width: 320px;
+}
+.nitted-hero-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 24px 24px 24px;
+  background: #EFE9E1;
+}
+.nitted-hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: -1px;
+}
+.nitted-hero-date {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.nitted-countdown {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  background: #fff8;
+  border-radius: 1rem;
+  padding: 1rem 2.5rem;
+  font-size: 2rem;
+  font-family: monospace;
+  font-weight: 700;
+  box-shadow: 0 2px 12px 0 #0001;
+  margin-bottom: 2rem;
+}
+.nitted-hero-sub {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.nitted-hero-desc {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.nitted-form {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 1.5rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.nitted-form input[type="email"] {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #ccc;
+  font-size: 1.1rem;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 1px 4px #0001;
+}
+.nitted-form button {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.nitted-form button:hover {
+  background: #333;
+}
+.nitted-form-caption {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+}
+.nitted-hero-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EFE9E1;
+  min-height: 350px;
+  padding: 24px 0;
+}
+.nitted-model-viewer {
+  width: 100%;
+  max-width: 480px;
+  height: 480px;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 24px 0 #0002;
+}
+@media (max-width: 899px) {
+  .nitted-hero-right {
+    min-height: 320px;
+    padding: 0 0 24px 0;
   }
-  .nitted-3d-tshirt-container {
-    flex: 0 0 440px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    width: 440px;
-    min-width: 320px;
-    margin: 2rem 0 0 0; /* Lower the 3D element */
-    padding-top: 0.5rem;
+  .nitted-model-viewer {
+    max-width: 340px;
+    height: 340px;
   }
-  .nitted-3d-tshirt-container model-viewer {
-    width: 400px !important;
-    height: 400px !important;
-    background: #faf5ef;
-    /* Remove border and border-radius */
-    border: none;
-    border-radius: 0;
-    margin: 0 auto;
-    display: block;
-    position: relative;
-    /* Ensure proper rendering */
-    --poster-color: transparent;
-    --progress-bar-color: transparent;
-    --progress-mask: transparent;
+}
+.nitted-product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 3rem auto 0 auto;
+  width: 100%;
+}
+@media (max-width: 899px) {
+  .nitted-product-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  
-  .nitted-3d-tshirt-container model-viewer::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 40px;
-    height: 40px;
-    margin: -20px 0 0 -20px;
-    border: 3px solid #e0d5c5;
-    border-top: 3px solid #000;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    z-index: 1;
-    opacity: 0.7;
-  }
-  
-  .nitted-3d-tshirt-container model-viewer[loaded]::before {
-    display: none;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  .nitted-logo-img {
-    display: block;
-    position: fixed;
-    top: 2.2rem;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 140px;
-    max-height: 70px;
-    object-fit: contain;
-    z-index: 10;
-  }
-  .nitted-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    min-height: 100vh;
-    padding-top: 7.5rem;
-    padding-bottom: 0;
-    box-sizing: border-box;
-    background: var(--beige) !important;
-  }
-  .nitted-hero-title {
-    font-family: var(--font-heading);
-    font-size: 2.2rem;
-    font-weight: 600;
-    margin: 0 0 1.1rem 0;
-    letter-spacing: 0.01em;
-    text-align: center;
-  }
-  .nitted-hero-sub {
-    font-size: 1.13rem;
-    font-weight: 400;
-    margin-bottom: 2.2rem;
-    color: #222;
-    text-align: center;
-  }
-  .nitted-email-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 520px;
-    margin: 0 auto 1.1rem auto;
-    gap: 0.7rem;
-  }
-  .nitted-email-input {
-    width: 100%;
-    padding: 1.5rem 1.5rem;
-    border-radius: var(--radius);
-    border: 1.5px solid #ece6dd;
-    font-size: 1.25rem;
-    font-family: var(--font-body);
-    background: #fff;
-    outline: none;
-    transition: border 0.2s;
-    text-align: center;
-    color: var(--black);
-    caret-color: var(--black);
-    z-index: 1;
-  }
-  .nitted-email-input:focus {
-    border: 1.5px solid var(--black);
-  }
-  .nitted-email-btn {
-    width: 100%;
-    padding: 1.5rem 0;
-    border-radius: var(--radius);
-    border: none;
-    background: var(--black);
-    color: var(--beige);
-    font-family: var(--font-heading);
-    font-size: 1.25rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 0.5rem;
-  }
-  .nitted-email-btn:hover, .nitted-email-btn:focus {
-    background: #222;
-  }
-  .nitted-hero-cta-sub {
-    font-size: 1.05rem;
-    color: #444;
-    margin-top: 0.7rem;
-    text-align: center;
-    margin-bottom: 2.2rem;
-  }
-  .nitted-drop-text {
-    font-family: var(--font-heading);
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--black);
-    margin: 2.2rem 0 0.5rem 0;
-    text-align: center;
-    letter-spacing: 0.02em;
-  }
-  .nitted-drop-text-large {
-    font-size: 3rem; /* Make it much larger */
-    margin-bottom: 0.5rem; /* Adjust spacing */
-  }
-  .nitted-countdown {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--black);
-    text-align: center;
-    margin: 2rem auto 2.5rem auto;
-    letter-spacing: 0.02em;
-    padding: 2rem 3rem;
-    background: var(--beige);
-    border: 3px solid var(--black);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    max-width: 500px;
-    display: block;
-    position: relative;
-    overflow: hidden;
-  }
-  .nitted-hero-title {
-    font-size: 2.6rem;
-    font-weight: 700;
-    margin: 2.2rem 0 1.2rem 0;
-  }
-  .nitted-hero-sub {
-    font-size: 1.5rem;
-    margin-bottom: 2.2rem;
-  }
-  .nitted-email-input {
-    font-size: 1.4rem;
-    padding: 1.7rem 1.5rem;
-  }
-  .nitted-email-btn {
-    font-size: 1.4rem;
-    padding: 1.7rem 0;
-  }
-  .nitted-hero-cta-sub {
-    font-size: 1.3rem;
-    margin-top: 1.2rem;
-    margin-bottom: 2.5rem;
-  }
-  .nitted-content-inner {
-    transform: translateY(-50px);
-  }
-  img, .nitted-infinite-img {
-    border-radius: 18px !important;
-    border: 3px solid #000 !important;
-  }
-  .nitted-img-frame {
-    width: 220px;
-    height: 220px;
-    border: 3px solid #000;
-    border-radius: 18px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    margin: 0 8px;
-  }
-  .nitted-infinite-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-    border: none !important;
-    margin: 0;
-    padding: 0;
-    background: none;
-    box-shadow: none;
-    display: block;
-    transition: none;
-    user-select: none;
-    pointer-events: none;
-    transform: scale(1.25); /* Zoom in to fill frame and even out border */
-  }
-  .nitted-infinite-gallery-outer {
-    width: 100%;
-    max-width: 600px;
-    margin: 2rem auto 0 auto;
-    height: 260px;
-    overflow: hidden;
-    position: relative;
-    touch-action: pan-x;
-    background: var(--beige);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 60px;
-  }
-  .nitted-infinite-gallery-inner {
-    display: flex;
-    position: relative;
-    width: max-content;
-    height: 100%;
-  }
-  .nitted-infinite-img {
-    width: 220px;
-    height: 220px;
-    object-fit: cover;
-    margin: 0;
-    padding: 0;
-    background: none;
-    border-radius: 18px !important;
-    border: 3px solid #000 !important;
-    box-shadow: none;
-    display: block;
-    transition: none;
-    user-select: none;
-    pointer-events: none;
-  }
-  @media (max-width: 700px) {
-    .nitted-img-frame { width: 100px; height: 100px; }
-    .nitted-infinite-img { transform: scale(1.18); }
-  }
-  @media (max-width: 700px) {
-    .nitted-logo-img { max-width: 80px; max-height: 40px; top: 1.2rem; }
-    .nitted-content { padding-top: 5.5rem; }
-    .nitted-hero-title { font-size: 1.4rem; }
-    .nitted-email-form { max-width: 98vw; }
-    .nitted-email-input, .nitted-email-btn { font-size: 1rem; padding: 1.1rem 0.8rem; }
-    .nitted-countdown { 
-      font-size: 1.8rem; 
-      padding: 1.5rem 2rem; 
-      margin: 1.5rem auto 2rem auto;
-      max-width: 90vw;
-    }
-    .nitted-infinite-gallery-outer { height: 120px; margin-bottom: 30px; }
-    .nitted-infinite-img { height: 100px; }
-    .nitted-drop-text-large { font-size: 2.2rem; }
-    .nitted-countdown { font-size: 1.7rem; padding: 1.2rem 0.7rem; max-width: 98vw; }
-    .nitted-hero-title { font-size: 1.3rem; }
-    .nitted-hero-sub { font-size: 1.1rem; }
-    .nitted-email-input, .nitted-email-btn { font-size: 1.1rem; padding: 1.1rem 0.8rem; }
-    .nitted-hero-cta-sub { font-size: 1.05rem; }
-    .nitted-content-inner { transform: translateY(-30px); }
-  }
-  @media (max-width: 1100px) {
-    .nitted-main-flex { flex-direction: column; align-items: center; gap: 2rem; }
-    .nitted-3d-tshirt-container, .nitted-3d-tshirt-container spline-viewer { width: 90vw !important; min-width: 0; }
-    .nitted-3d-tshirt-container spline-viewer { height: 300px !important; }
-  }
-  .nitted-3d-tshirt-container spline-viewer {
-    width: 400px !important;
-    height: 400px !important;
-    margin: 0 auto;
-    display: block;
-    background: #faf5ef;
-  }
+}
+.nitted-product-img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px 0 #0001;
+  background: #fff;
+}
+.nitted-product-img.blur {
+  filter: blur(6px) brightness(1.1);
+  transform: scale(1.05);
+}
 </style>
-<div class="nitted-main-flex">
-  <div class="nitted-content-inner">
-    <div class="nitted-content">
-      <div class="nitted-drop-text nitted-drop-text-large">Dropping August 1st</div>
-      <div class="nitted-countdown" id="nitted-countdown"></div>
-      <h1 class="nitted-hero-title">The Coziest Drop Is Coming ☁️</h1>
-      <p class="nitted-hero-sub">Minimal essentials for comfort, calm, and everyday softness.</p>
-      <form method="post" action="/contact#ContactFooter" id="ContactFooter" class="nitted-email-form" accept-charset="UTF-8" autocomplete="off">
-        <input type="hidden" name="form_type" value="customer" />
-        <input type="hidden" name="utf8" value="✓" />
-        <input type="email" id="NewsletterForm--main" name="contact[email]" class="nitted-email-input" autocorrect="off" autocapitalize="off" autocomplete="email" placeholder="Enter your email" required>
-        <button type="submit" class="nitted-email-btn">Join the Waitlist →</button>
-        {% if form.posted_successfully? %}
-          <div class="nitted-newsletter-success" style="color:#1a4d1a; font-size:1.1rem; margin-top:1.2rem; text-align:center;">Thank you for joining the waitlist! You're on the list for first access and exclusive offers.</div>
-        {% endif %}
-        {% if form.errors %}
-          <div class="nitted-newsletter-error" style="color:#b00; font-size:1rem; margin-top:0.5rem; text-align:center;">
-            {{ form.errors | default_errors }}
-          </div>
-        {% endif %}
-      </form>
-      <div class="nitted-hero-cta-sub">You'll get first access & a secret discount 👀</div>
-      <div class="nitted-infinite-gallery-outer">
-        <div class="nitted-infinite-gallery-inner" id="nitted-infinite-gallery-inner"></div>
+
+<section class="nitted-landing">
+  <div class="nitted-hero">
+    <!-- Left: Text & Form -->
+    <div class="nitted-hero-left">
+      <div class="nitted-hero-title">nitted</div>
+      <div class="nitted-hero-date">Dropping August 2nd</div>
+      <div class="nitted-countdown" id="nitted-countdown">
+        <span><span id="nitted-days">00</span> <span style="font-size:0.8rem;">DAYS</span></span>
+        <span>:</span>
+        <span><span id="nitted-hours">00</span> <span style="font-size:0.8rem;">HRS</span></span>
+        <span>:</span>
+        <span><span id="nitted-minutes">00</span> <span style="font-size:0.8rem;">MIN</span></span>
+        <span>:</span>
+        <span><span id="nitted-seconds">00</span> <span style="font-size:0.8rem;">SEC</span></span>
       </div>
+      <div class="nitted-hero-sub">The Coziest Drop Is Coming ☁️</div>
+      <div class="nitted-hero-desc">Minimal essentials for comfort, calm, and everyday softness.</div>
+      <form class="nitted-form">
+        <input type="email" placeholder="Enter your email" required />
+        <button type="submit">Join the Waitlist →</button>
+        <div class="nitted-form-caption">You'll get first access & a secret discount 👀</div>
+      </form>
+    </div>
+    <!-- Right: 3D Model -->
+    <div class="nitted-hero-right">
+      <model-viewer
+        src="{{ 'shirt.glb' | asset_url }}"
+        alt="3D model"
+        auto-rotate
+        camera-controls
+        ar
+        class="nitted-model-viewer"
+        style="background: #fff;"
+        exposure="1.1"
+        shadow-intensity="0.7"
+      ></model-viewer>
     </div>
   </div>
-  <!-- 3D T-shirt viewer with transparent background -->
-  <div class="nitted-3d-tshirt-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 2rem 0;">
-    <model-viewer
-      src="{{ 'shirt3dmodel.glb' | asset_url }}"
-      alt="3D view of a shirt"
-      camera-controls
-      auto-rotate
-      exposure="1.3"
-      shadow-intensity="0"
-      shadow-softness="0"
-      environment-image="none"
-      style="width: 100%; max-width: 600px; height: 500px;"
-      ar
-      ar-modes="webxr scene-viewer quick-look"
-      ar-scale="fixed"
-      ar-placement="floor"
-    ></model-viewer>
+  <!-- Product Grid -->
+  <div class="nitted-product-grid">
+    <img src="{{ 'shirt1.jpg' | asset_url }}" alt="Shirt" class="nitted-product-img" />
+    <img src="{{ 'shirt2.jpg' | asset_url }}" alt="Shirt Blurred" class="nitted-product-img blur" />
+    <img src="{{ 'shirt3.jpg' | asset_url }}" alt="Shirt" class="nitted-product-img" />
   </div>
-</div>
+</section>
+
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script>
-// Robust, truly infinite, virtualized horizontal gallery (fixed slots, virtual scroll, no DOM jumps)
+// Countdown Timer to August 2, 2025
 (function() {
-  var imageSources = [
-    "{{ 'product-photo1.png' | asset_url }}",
-    "{{ 'product-photo2.png' | asset_url }}",
-    "{{ 'product-photo1.png' | asset_url }}",
-    "{{ 'product-photo2.png' | asset_url }}"
-  ];
-  var outer = document.querySelector('.nitted-infinite-gallery-outer');
-  var inner = document.getElementById('nitted-infinite-gallery-inner');
-  var imgHeight = window.innerWidth < 700 ? 100 : 220;
-  var imgWidth = window.innerWidth < 700 ? 160 : 320;
-  var imgMargin = window.innerWidth < 700 ? 8 : 18;
-  var slotCount = 12; // Always render this many slots
-  var MAX_VELOCITY = 3;
-  var state = {
-    scroll: 0, // virtual scroll position in px
-    dragging: false,
-    dragStartX: 0,
-    dragStartScroll: 0,
-    rafId: null,
-    velocity: 0.15,
-    lastX: 0,
-    lastMoveTime: 0,
-    userVelocity: 0,
-    easing: false
-  };
-
-  // Set up flexbox layout
-  inner.style.display = 'flex';
-  inner.style.flexDirection = 'row';
-  inner.style.alignItems = 'center';
-  inner.style.position = 'absolute';
-  inner.style.left = '0';
-  inner.style.top = '0';
-  inner.style.height = '100%';
-
-  function mod(n, m) {
-    return ((n % m) + m) % m;
-  }
-
-  function createSlot() {
-    var frame = document.createElement('div');
-    frame.className = 'nitted-img-frame';
-    var img = document.createElement('img');
-    img.className = 'nitted-infinite-img';
-    img.draggable = false;
-    frame.appendChild(img);
-    return frame;
-  }
-
-  function fillSlots() {
-    inner.innerHTML = '';
-    for (var i = 0; i < slotCount; i++) {
-      inner.appendChild(createSlot());
-    }
-  }
-
-  function updateSlots() {
-    var imgs = Array.from(inner.children);
-    var vw = outer.offsetWidth;
-    var totalImgWidth = imgWidth + 2 * imgMargin;
-    // The index of the image at the leftmost slot
-    var firstIdx = Math.floor(state.scroll / totalImgWidth);
-    for (var i = 0; i < slotCount; i++) {
-      var imgIdx = firstIdx + i;
-      var srcIdx = mod(imgIdx, imageSources.length);
-      var frame = imgs[i];
-      var img = frame.querySelector('img');
-      if (img.src !== imageSources[srcIdx]) img.src = imageSources[srcIdx];
-      img.alt = 'Nitted product photo ' + (srcIdx + 1);
-      // No more absolute positioning or transform on frame
-    }
-  }
-
-  function rafUpdate() {
-    if (state.velocity > MAX_VELOCITY) state.velocity = MAX_VELOCITY;
-    if (state.velocity < -MAX_VELOCITY) state.velocity = -MAX_VELOCITY;
-    if (!state.dragging) {
-      state.scroll += state.velocity;
-    }
-    updateSlots();
-    state.rafId = requestAnimationFrame(rafUpdate);
-  }
-
-  function onPointerDown(e) {
-    state.dragging = true;
-    state.dragStartX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-    state.dragStartScroll = state.scroll;
-    state.lastX = state.dragStartX;
-    state.lastMoveTime = Date.now();
-    state.userVelocity = 0;
-    state.easing = false;
-    outer.style.cursor = 'grabbing';
-  }
-  function onPointerMove(e) {
-    if (!state.dragging) return;
-    var x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-    var dx = x - state.dragStartX;
-    state.scroll = state.dragStartScroll - dx;
-    var now = Date.now();
-    var dt = now - state.lastMoveTime;
-    if (dt > 0) {
-      state.userVelocity = -(x - state.lastX) / dt * 16;
-    }
-    state.lastX = x;
-    state.lastMoveTime = now;
-    updateSlots();
-  }
-  function onPointerUp(e) {
-    state.dragging = false;
-    outer.style.cursor = '';
-    state.easing = true;
-    easeToAutoscroll();
-  }
-
-  function easeToAutoscroll() {
-    if (!state.easing) return;
-    if (Math.abs(state.userVelocity) > 0.2) {
-      state.velocity = state.userVelocity * 0.95 + 0.15 * 0.05;
-      state.userVelocity *= 0.95;
-      requestAnimationFrame(easeToAutoscroll);
-    } else {
-      state.velocity = 0.15;
-      state.userVelocity = 0;
-      state.easing = false;
-    }
-  }
-
-  outer.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-  outer.addEventListener('touchstart', onPointerDown, {passive:false});
-  window.addEventListener('touchmove', onPointerMove, {passive:false});
-  window.addEventListener('touchend', onPointerUp);
-  outer.addEventListener('dragstart', function(e) { e.preventDefault(); });
-  window.addEventListener('resize', function() {
-    fillSlots();
-    updateSlots();
-  });
-
-  fillSlots();
-  updateSlots();
-  rafUpdate();
-})();
-
-// Live countdown timer to August 1st, 2025, 12:00 PM local time
-(function() {
-  // Set the target date to August 1st, 2025, 12:00 PM local time
-  const targetDate = new Date(2025, 7, 1, 12, 0, 0); // month is 0-indexed, so 7 = August
-
+  function pad(n) { return n < 10 ? '0' + n : n; }
   function updateCountdown() {
-    const now = new Date();
-    const diff = targetDate - now;
-
-    if (diff <= 0) {
-      document.getElementById('nitted-countdown').innerHTML = "Countdown finished!";
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-
-    document.getElementById('nitted-countdown').innerHTML =
-      `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    var target = new Date('2025-08-02T00:00:00Z');
+    var now = new Date();
+    var diff = target - now;
+    if (diff < 0) diff = 0;
+    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    var minutes = Math.floor((diff / (1000 * 60)) % 60);
+    var seconds = Math.floor((diff / 1000) % 60);
+    document.getElementById('nitted-days').textContent = pad(days);
+    document.getElementById('nitted-hours').textContent = pad(hours);
+    document.getElementById('nitted-minutes').textContent = pad(minutes);
+    document.getElementById('nitted-seconds').textContent = pad(seconds);
   }
-
   updateCountdown();
   setInterval(updateCountdown, 1000);
 })();
