@@ -11,6 +11,29 @@ function ShirtModel({ autoRotate, onRotationEnd }) {
   const group = useRef();
   const { scene } = useGLTF("/shirt.glb");
   const [rotation, setRotation] = useState(0);
+
+  // Force all materials to be opaque and non-transparent
+  useEffect(() => {
+    scene.traverse((obj) => {
+      if (obj.isMesh && obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach((mat) => {
+            mat.transparent = false;
+            mat.opacity = 1;
+            if (mat.alphaTest !== undefined) mat.alphaTest = 0;
+            if (mat.depthWrite !== undefined) mat.depthWrite = true;
+          });
+        } else {
+          obj.material.transparent = false;
+          obj.material.opacity = 1;
+          if (obj.material.alphaTest !== undefined) obj.material.alphaTest = 0;
+          if (obj.material.depthWrite !== undefined)
+            obj.material.depthWrite = true;
+        }
+      }
+    });
+  }, [scene]);
+
   useFrame((state, delta) => {
     if (autoRotate && rotation < Math.PI * 2) {
       const increment = (Math.PI * 2) / 6 / 60; // 360deg in 6s at 60fps
@@ -290,14 +313,21 @@ export default function NittedLandingPage() {
                 }}
                 shadows
               >
-                <ambientLight intensity={0.7} />
+                {/* Improved lighting setup */}
+                <ambientLight intensity={0.9} />
                 <directionalLight
                   position={[2, 4, 2]}
-                  intensity={0.7}
+                  intensity={1.1}
                   castShadow
-                  shadow-mapSize-width={1024}
-                  shadow-mapSize-height={1024}
+                  shadow-mapSize-width={2048}
+                  shadow-mapSize-height={2048}
                 />
+                <directionalLight
+                  position={[-2, 2, -2]}
+                  intensity={0.5}
+                  color="#fffbe6"
+                />
+                <pointLight position={[0, 2, 2]} intensity={0.3} />
                 <Suspense fallback={<Html center>Loading…</Html>}>
                   <ShirtModel
                     autoRotate={autoRotate}
