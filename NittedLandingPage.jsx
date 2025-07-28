@@ -1,50 +1,8 @@
 import React, { useRef, useState, useEffect, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Html } from "@react-three/drei";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
-
-// --- 3D Shirt Model Component ---
-function ShirtModel({ autoRotate, onRotationEnd }) {
-  const group = useRef();
-  const { scene } = useGLTF("/shirt.glb");
-  const [rotation, setRotation] = useState(0);
-
-  // Force all materials to be opaque and non-transparent
-  useEffect(() => {
-    scene.traverse((obj) => {
-      if (obj.isMesh && obj.material) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach((mat) => {
-            mat.transparent = false;
-            mat.opacity = 1;
-            if (mat.alphaTest !== undefined) mat.alphaTest = 0;
-            if (mat.depthWrite !== undefined) mat.depthWrite = true;
-          });
-        } else {
-          obj.material.transparent = false;
-          obj.material.opacity = 1;
-          if (obj.material.alphaTest !== undefined) obj.material.alphaTest = 0;
-          if (obj.material.depthWrite !== undefined)
-            obj.material.depthWrite = true;
-        }
-      }
-    });
-  }, [scene]);
-
-  useFrame((state, delta) => {
-    if (autoRotate && rotation < Math.PI * 2) {
-      const increment = (Math.PI * 2) / 6 / 60; // 360deg in 6s at 60fps
-      const next = Math.min(rotation + increment, Math.PI * 2);
-      group.current.rotation.y = next;
-      setRotation(next);
-      if (next >= Math.PI * 2 && onRotationEnd) onRotationEnd();
-    }
-  });
-  return <primitive ref={group} object={scene} position={[0, -0.7, 0]} />;
-}
 
 // --- Countdown Timer ---
 function Countdown() {
@@ -86,33 +44,55 @@ function Countdown() {
   );
 }
 
-// --- Product Grid ---
-function ProductGrid() {
+// --- Rotating Product Grid ---
+function RotatingProductGrid() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const images = [
+    "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=400&q=80"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 3000); // Rotate every 3 seconds
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   return (
-    <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-4xl mx-auto">
-      {/* Left blurred */}
-      <div className="h-64 flex items-center justify-center">
-        <img
-          src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80"
-          alt="Blurred Shirt"
-          className="w-full h-full object-cover rounded-xl blur-md scale-105 brightness-110"
-        />
-      </div>
-      {/* Center sharp */}
-      <div className="h-64 flex items-center justify-center">
-        <img
-          src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80"
-          alt="Shirt"
-          className="w-full h-full object-cover rounded-xl shadow-lg"
-        />
-      </div>
-      {/* Right blurred */}
-      <div className="h-64 flex items-center justify-center">
-        <img
-          src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80"
-          alt="Blurred Shirt"
-          className="w-full h-full object-cover rounded-xl blur-md scale-105 brightness-110"
-        />
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative w-full max-w-md h-96">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <img
+              src={images[currentIndex]}
+              alt={`Product ${currentIndex + 1}`}
+              className="w-full h-full object-cover rounded-xl shadow-lg"
+            />
+          </motion.div>
+        </AnimatePresence>
+        
+        {/* Navigation dots */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "bg-white scale-125" : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -176,17 +156,13 @@ function DropSection() {
           You'll get first access & a secret discount 👀
         </span>
       </form>
-      <ProductGrid />
     </motion.section>
   );
 }
 
 // --- Main Landing Page ---
 export default function NittedLandingPage() {
-  const [autoRotate, setAutoRotate] = useState(true);
-  const [showControls, setShowControls] = useState(false);
   const [bg, setBg] = useState("#EFE9E1");
-  const canvasRef = useRef();
 
   // Snap scroll to drop section
   useEffect(() => {
@@ -222,12 +198,6 @@ export default function NittedLandingPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // After 360deg spin, enable controls
-  const handleRotationEnd = () => {
-    setAutoRotate(false);
-    setShowControls(true);
-  };
-
   return (
     <div
       className="font-sans min-h-screen w-full"
@@ -236,7 +206,7 @@ export default function NittedLandingPage() {
         transition: "background 0.7s cubic-bezier(.4,0,.2,1)",
       }}
     >
-      {/* 3D Split Hero Section */}
+      {/* Split Hero Section */}
       <section className="relative h-screen w-full flex flex-col md:flex-row items-stretch justify-stretch overflow-hidden">
         {/* Left: Text Content */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 z-20 bg-transparent">
@@ -292,52 +262,18 @@ export default function NittedLandingPage() {
             </form>
           </div>
         </div>
-        {/* Right: 3D Model */}
+        {/* Right: Rotating Product Images */}
         <div className="w-full md:w-1/2 h-96 md:h-full relative flex items-center justify-center bg-transparent">
           <AnimatePresence>
             <motion.div
-              key="canvas"
+              key="product-grid"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8 }}
               className="absolute inset-0 w-full h-full"
             >
-              <Canvas
-                ref={canvasRef}
-                camera={{ position: [0, 0.7, 2.2], fov: 32 }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  background: "transparent",
-                }}
-                shadows
-              >
-                {/* Improved lighting setup */}
-                <ambientLight intensity={0.9} />
-                <directionalLight
-                  position={[2, 4, 2]}
-                  intensity={1.1}
-                  castShadow
-                  shadow-mapSize-width={2048}
-                  shadow-mapSize-height={2048}
-                />
-                <directionalLight
-                  position={[-2, 2, -2]}
-                  intensity={0.5}
-                  color="#fffbe6"
-                />
-                <pointLight position={[0, 2, 2]} intensity={0.3} />
-                <Suspense fallback={<Html center>Loading…</Html>}>
-                  <ShirtModel
-                    autoRotate={autoRotate}
-                    onRotationEnd={handleRotationEnd}
-                  />
-                </Suspense>
-                {showControls && (
-                  <OrbitControls enablePan enableZoom enableRotate />
-                )}
-              </Canvas>
+              <RotatingProductGrid />
             </motion.div>
           </AnimatePresence>
           {/* Scroll Down Indicator (mobile only) */}
@@ -359,7 +295,3 @@ export default function NittedLandingPage() {
     </div>
   );
 }
-
-// --- GLTF Loader Preload ---
-// @react-three/drei recommends preloading models
-useGLTF.preload("/shirt.glb");
