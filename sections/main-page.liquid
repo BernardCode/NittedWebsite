@@ -191,7 +191,7 @@
       <div class="nitted-carousel">
         <img id="carousel-left" class="nitted-carousel-img side" src="{{ 'product-photo2.png' | asset_url }}" alt="Product Side" />
         <img id="carousel-center" class="nitted-carousel-img center" src="{{ 'product-photo1.png' | asset_url }}" alt="Product Center" />
-        <img id="carousel-right" class="nitted-carousel-img side" src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=400&q=80" alt="Product Side" />
+        <img id="carousel-right" class="nitted-carousel-img side" src="{{ 'product-photo3.png' | asset_url }}" alt="Product Side" />
       </div>
     </div>
   </div>
@@ -222,10 +222,9 @@
 // Carousel-style rotating images
 (function() {
   var images = [
-    { src: "{{ 'product-photo1.png' | asset_url }}", alt: "Product 1" },
-    { src: "{{ 'product-photo2.png' | asset_url }}", alt: "Product 2" },
-    { src: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=400&q=80", alt: "Product 3" },
-    { src: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&q=80", alt: "Product 4" }
+    { src: "{{ 'product-photo1.png' | asset_url }}", alt: "Nitted Sweater" },
+    { src: "{{ 'product-photo2.png' | asset_url }}", alt: "Nitted T-Shirt in Water" },
+    { src: "{{ 'product-photo3.png' | asset_url }}", alt: "Nitted T-Shirt on Mannequin" }
   ];
   var idx = 0;
   
