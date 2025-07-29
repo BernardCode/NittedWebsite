@@ -168,7 +168,7 @@
     <!-- Left: Logo, Text & Form -->
     <div class="nitted-hero-left">
       <img src="{{ 'logo.png' | asset_url }}" alt="nitted logo" class="nitted-logo-img" />
-      <div class="nitted-hero-date">Dropping August 1st</div>
+      <div class="nitted-hero-date">Dropping August 10th</div>
       <div class="nitted-countdown" id="nitted-countdown">
         <span><span id="nitted-days">00</span> <span style="font-size:0.8rem;">DAYS</span></span>
         <span>:</span>
@@ -198,11 +198,11 @@
 </section>
 
 <script>
-// Countdown Timer to August 1, 2025
+// Countdown Timer to August 10, 2025
 (function() {
   function pad(n) { return n < 10 ? '0' + n : n; }
   function updateCountdown() {
-    var target = new Date('2025-08-01T00:00:00Z');
+    var target = new Date('2025-08-10T00:00:00Z');
     var now = new Date();
     var diff = target - now;
     if (diff < 0) diff = 0;
