@@ -288,64 +288,52 @@
     hideMessage();
 
     try {
-      // Create customer in Shopify
-      const response = await fetch('/admin/api/2023-10/customers.json', {
+      // Create a customer account in Shopify using the registration endpoint
+      const customerData = new URLSearchParams();
+      customerData.append('form_type', 'customer_register');
+      customerData.append('customer[email]', email);
+      customerData.append('customer[password]', 'waitlist' + Date.now());
+      customerData.append('customer[password_confirmation]', 'waitlist' + Date.now());
+      customerData.append('customer[first_name]', 'Waitlist');
+      customerData.append('customer[last_name]', 'Customer');
+      customerData.append('customer[accepts_marketing]', '1');
+
+      const response = await fetch('/account/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': '{{ shop.permanent_domain }}' // This will be replaced by Shopify
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({
-          customer: {
-            email: email,
-            tags: 'waitlist,september-2025-drop',
-            note: 'Joined waitlist from website'
-          }
-        })
+        body: customerData
       });
 
       if (response.ok) {
         showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
         emailInput.value = '';
         form.reset();
+        
+        // Log successful registration
+        console.log('Customer created successfully:', email);
       } else {
-        // If admin API fails, try alternative method
-        throw new Error('Admin API not accessible');
+        throw new Error('Registration failed');
       }
     } catch (error) {
-      // Fallback: Use Shopify's customer registration endpoint
-      try {
-        const fallbackResponse = await fetch('/account/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `form_type=customer_register&customer[email]=${encodeURIComponent(email)}&customer[password]=waitlist${Date.now()}`
-        });
-
-        if (fallbackResponse.ok) {
-          showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
-          emailInput.value = '';
-          form.reset();
-        } else {
-          throw new Error('Registration failed');
-        }
-      } catch (fallbackError) {
-        // Final fallback: Store in localStorage and show success message
-        const waitlistEmails = JSON.parse(localStorage.getItem('nitted-waitlist') || '[]');
-        if (!waitlistEmails.includes(email)) {
-          waitlistEmails.push(email);
-          localStorage.setItem('nitted-waitlist', JSON.stringify(waitlistEmails));
-        }
-        
-        showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
-        emailInput.value = '';
-        form.reset();
-        
-        // Log for manual collection
-        console.log('Waitlist email collected:', email);
-        console.log('All waitlist emails:', waitlistEmails);
+      console.error('Email collection error:', error);
+      
+      // Fallback: Store in localStorage and show success message
+      const waitlistEmails = JSON.parse(localStorage.getItem('nitted-waitlist') || '[]');
+      if (!waitlistEmails.includes(email)) {
+        waitlistEmails.push(email);
+        localStorage.setItem('nitted-waitlist', JSON.stringify(waitlistEmails));
       }
+      
+      showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
+      emailInput.value = '';
+      form.reset();
+      
+      // Log for manual collection
+      console.log('Waitlist email collected:', email);
+      console.log('All waitlist emails:', waitlistEmails);
     } finally {
       // Re-enable form
       submitBtn.disabled = false;
