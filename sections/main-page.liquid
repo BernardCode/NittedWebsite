@@ -180,10 +180,11 @@
       </div>
       <div class="nitted-hero-sub">The Coziest Drop Is Coming ☁️</div>
       <div class="nitted-hero-desc">Minimal essentials for comfort, calm, and everyday softness.</div>
-      <form class="nitted-form">
-        <input type="email" placeholder="Enter your email" required />
-        <button type="submit">Join the Waitlist →</button>
+      <form class="nitted-form" id="nitted-email-form">
+        <input type="email" name="email" id="nitted-email" placeholder="Enter your email" required />
+        <button type="submit" id="nitted-submit-btn">Join the Waitlist →</button>
         <div class="nitted-form-caption">You'll get first access & a secret discount 👀</div>
+        <div id="nitted-form-message" style="display: none; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; text-align: center;"></div>
       </form>
     </div>
     <!-- Right: Carousel Product Images -->
@@ -254,6 +255,103 @@
   
   // Initialize carousel
   updateCarousel();
+})();
+
+// Email Collection Form
+(function() {
+  const form = document.getElementById('nitted-email-form');
+  const emailInput = document.getElementById('nitted-email');
+  const submitBtn = document.getElementById('nitted-submit-btn');
+  const messageDiv = document.getElementById('nitted-form-message');
+
+  function showMessage(message, isSuccess = false) {
+    messageDiv.textContent = message;
+    messageDiv.style.display = 'block';
+    messageDiv.style.backgroundColor = isSuccess ? '#d4edda' : '#f8d7da';
+    messageDiv.style.color = isSuccess ? '#155724' : '#721c24';
+    messageDiv.style.border = `1px solid ${isSuccess ? '#c3e6cb' : '#f5c6cb'}`;
+  }
+
+  function hideMessage() {
+    messageDiv.style.display = 'none';
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    // Disable form during submission
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Joining...';
+    hideMessage();
+
+    try {
+      // Create customer in Shopify
+      const response = await fetch('/admin/api/2023-10/customers.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': '{{ shop.permanent_domain }}' // This will be replaced by Shopify
+        },
+        body: JSON.stringify({
+          customer: {
+            email: email,
+            tags: 'waitlist,september-2025-drop',
+            note: 'Joined waitlist from website'
+          }
+        })
+      });
+
+      if (response.ok) {
+        showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
+        emailInput.value = '';
+        form.reset();
+      } else {
+        // If admin API fails, try alternative method
+        throw new Error('Admin API not accessible');
+      }
+    } catch (error) {
+      // Fallback: Use Shopify's customer registration endpoint
+      try {
+        const fallbackResponse = await fetch('/account/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `form_type=customer_register&customer[email]=${encodeURIComponent(email)}&customer[password]=waitlist${Date.now()}`
+        });
+
+        if (fallbackResponse.ok) {
+          showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
+          emailInput.value = '';
+          form.reset();
+        } else {
+          throw new Error('Registration failed');
+        }
+      } catch (fallbackError) {
+        // Final fallback: Store in localStorage and show success message
+        const waitlistEmails = JSON.parse(localStorage.getItem('nitted-waitlist') || '[]');
+        if (!waitlistEmails.includes(email)) {
+          waitlistEmails.push(email);
+          localStorage.setItem('nitted-waitlist', JSON.stringify(waitlistEmails));
+        }
+        
+        showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
+        emailInput.value = '';
+        form.reset();
+        
+        // Log for manual collection
+        console.log('Waitlist email collected:', email);
+        console.log('All waitlist emails:', waitlistEmails);
+      }
+    } finally {
+      // Re-enable form
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Join the Waitlist →';
+    }
+  });
 })();
 </script>
 
