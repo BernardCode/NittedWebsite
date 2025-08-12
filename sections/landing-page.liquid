@@ -183,8 +183,10 @@
       </div>
       <div class="nitted-hero-sub">The Coziest Drop Is Coming ☁️</div>
       <div class="nitted-hero-desc">Minimal essentials for comfort, calm, and everyday softness.</div>
-      <form class="nitted-form" id="nitted-email-form">
-        <input type="email" name="email" id="nitted-email" placeholder="Enter your email" required />
+      <form class="nitted-form" id="nitted-email-form" action="/contact" method="post">
+        <input type="hidden" name="form_type" value="customer" />
+        <input type="hidden" name="utf8" value="✓" />
+        <input type="email" name="contact[email]" id="nitted-email" placeholder="Enter your email" required />
         <button type="submit" id="nitted-submit-btn">Join the Waitlist →</button>
         <div class="nitted-form-caption">You'll get first access & a secret discount 👀</div>
         <div id="nitted-form-message" style="display: none; margin-top: 1rem; padding: 0.75rem; border-radius: 0.5rem; text-align: center;"></div>
@@ -285,69 +287,34 @@
     messageDiv.style.display = 'none';
   }
 
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
+  form.addEventListener('submit', function(e) {
     const email = emailInput.value.trim();
-    if (!email) return;
+    if (!email) {
+      e.preventDefault();
+      return;
+    }
 
-    // Disable form during submission
+    // Show loading state
     submitBtn.disabled = true;
     submitBtn.textContent = 'Joining...';
     hideMessage();
 
-    try {
-      // Create a customer account in Shopify using the registration endpoint
-      const customerData = new URLSearchParams();
-      customerData.append('form_type', 'customer_register');
-      customerData.append('customer[email]', email);
-      customerData.append('customer[password]', 'waitlist' + Date.now());
-      customerData.append('customer[password_confirmation]', 'waitlist' + Date.now());
-      customerData.append('customer[first_name]', 'Waitlist');
-      customerData.append('customer[last_name]', 'Customer');
-      customerData.append('customer[accepts_marketing]', '1');
-
-      const response = await fetch('/account/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: customerData
-      });
-
-      if (response.ok) {
-        showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
-        emailInput.value = '';
-        form.reset();
-        
-        // Log successful registration
-        console.log('Customer created successfully:', email);
-      } else {
-        throw new Error('Registration failed');
-      }
-    } catch (error) {
-      console.error('Email collection error:', error);
-      
-      // Fallback: Store in localStorage and show success message
-      const waitlistEmails = JSON.parse(localStorage.getItem('nitted-waitlist') || '[]');
-      if (!waitlistEmails.includes(email)) {
-        waitlistEmails.push(email);
-        localStorage.setItem('nitted-waitlist', JSON.stringify(waitlistEmails));
-      }
-      
+    // Let the form submit naturally to Shopify
+    // The form will redirect to /contact and create the customer
+    
+    // Show success message after a short delay
+    setTimeout(() => {
       showMessage('🎉 Welcome to the waitlist! You\'ll get first access to our September drop.', true);
       emailInput.value = '';
       form.reset();
       
-      // Log for manual collection
-      console.log('Waitlist email collected:', email);
-      console.log('All waitlist emails:', waitlistEmails);
-    } finally {
       // Re-enable form
       submitBtn.disabled = false;
       submitBtn.textContent = 'Join the Waitlist →';
-    }
+      
+      // Log successful submission
+      console.log('Email submitted to Shopify:', email);
+    }, 1000);
   });
 })();
 </script> 
